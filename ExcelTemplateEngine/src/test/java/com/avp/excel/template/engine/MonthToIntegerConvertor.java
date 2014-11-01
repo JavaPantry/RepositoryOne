@@ -23,10 +23,10 @@ public class MonthToIntegerConvertor implements IConvertor {
 		String monthName = ((String)input).toUpperCase();
 		for (int i = 0; i < months.length; i++) {
 			if(monthName.equals(months[i])){
-				return new Integer(i);
+				return Integer.valueOf(i);//new Integer(i);
 			}
 		}
-		return new Integer(-1);
+		return Integer.valueOf(-1);//new Integer(-1);
 	}
 
 }

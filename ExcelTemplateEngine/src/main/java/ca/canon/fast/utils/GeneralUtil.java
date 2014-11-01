@@ -56,8 +56,8 @@ public class GeneralUtil {
 	}
 	 */
 	public static boolean isNullSafeEqual(Long l1,Long l2){
-		if(l1==null) l1 = new Long(0L);
-		if(l2==null) l2 = new Long(0L);
+		if(l1==null) l1 =  Long.valueOf(0L);
+		if(l2==null) l2 =  Long.valueOf(0L);
 		return l1.equals(l2);
 	}
 

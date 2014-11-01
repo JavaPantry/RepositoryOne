@@ -69,8 +69,7 @@ public class BeanUtility {
 						}
 						PropertyUtils.setProperty(dst, key, dstList);
 					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.debug(e,e);
 					} 
 				}else if(value!=null){
 					Object dstValue = PropertyUtils.getProperty(dst, key);
@@ -84,14 +83,11 @@ public class BeanUtility {
 				}
 			}
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.debug(e,e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.debug(e,e);		
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.debug(e,e);		
 		}
 	}
 

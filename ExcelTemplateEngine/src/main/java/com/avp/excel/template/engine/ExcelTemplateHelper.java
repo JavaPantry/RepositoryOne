@@ -181,12 +181,10 @@ public class ExcelTemplateHelper {
 			}
 			logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.debug(e,e);
 				throw new Exception(errMsg,e);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.debug(e,e);
 				throw new Exception(errMsg,e);
 			}
 	}
@@ -249,19 +247,19 @@ public class ExcelTemplateHelper {
 			}
 			logger.debug("End of data sheet in workbook");
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			logger.debug(e,e);
 			throw new Exception(errMsg,e);
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			logger.debug(e,e);
 			throw new Exception(errMsg,e);
 		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+			logger.debug(e,e);
 			throw new Exception(errMsg,e);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			logger.debug(e,e);
 			throw new Exception(errMsg,e);
 		} catch (InstantiationException e) {
-			e.printStackTrace();
+			logger.debug(e,e);
 			throw new Exception(errMsg,e);
 		}
 		return resultMap;
