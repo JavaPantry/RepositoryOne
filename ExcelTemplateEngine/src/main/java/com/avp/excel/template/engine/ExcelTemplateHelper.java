@@ -26,7 +26,6 @@ import ca.canon.fast.utils.BeanUtility;
 import ca.canon.fast.utils.GeneralUtil;
 /**
  * v 1.2 before extract ClassProperty from ExcelTemplateHelper 
- * 
  * @author ptitchkin
  *
  */
