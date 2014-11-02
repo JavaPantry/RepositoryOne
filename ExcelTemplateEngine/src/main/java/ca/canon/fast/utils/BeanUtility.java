@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Help utility wrapper for org.apache.commons.beanutils
- * v 1.0
+ * v 1.1
  * 
  * Unlike apache commons BeanUtil will not overwrite properties with null values
  * @author Q05459

@@ -13,6 +13,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 
+/**
+ * 
+ * Test for branch "Refactoring" 
+ * @author ptitchkin
+ *
+ */
 public class ExcelTemplateHelperTest {
 	private final static Logger logger = Logger.getLogger(ExcelTemplateHelperTest.class);
 	
