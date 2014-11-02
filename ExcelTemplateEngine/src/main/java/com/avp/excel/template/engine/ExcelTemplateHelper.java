@@ -9,7 +9,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,7 +24,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import ca.canon.fast.utils.BeanUtility;
 import ca.canon.fast.utils.GeneralUtil;
 /**
- * v 1.2 before extract ClassProperty from ExcelTemplateHelper 
+ * v 1.3  ClassProperty extracted from ExcelTemplateHelper 
  * @author ptitchkin
  *
  */
@@ -38,54 +37,14 @@ public class ExcelTemplateHelper {
 		Data("Data"), 
 		MetaData("SERVICE_SHEET");
 		private String typeCode;
+		
 		SpreadsheetType(String type){typeCode = type;}
 		public String toString() {return typeCode;}
 		@Deprecated
 		public String getTypeCode() {return typeCode;}
 	}
-	// Don't really need it here
-	//private SpreadsheetType type = SpreadsheetType.Data;
-	//public SpreadsheetType getType() {return type;}
-	//public void setType(SpreadsheetType type) {this.type = type;}
 	
-	
-	class ClassProperty{
-		private String className;
-		private String propertyName;
-		private IConvertor convertor;
-		
-		/* 
-		 * TODO - <AP> exctract IConvertor from inputCellDescriptor
-		 * very naive implementation 
-		 * input: ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName
-		 * className: ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO
-		 * propertyName:userName
-		 * 
-		 */
-		public ClassProperty(String inputCellDescriptor) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-			String descriptors[] = inputCellDescriptor.split(",");
-			String fullName = descriptors[0];
-			fullName = fullName.substring(2, fullName.length()-1);
-			int propertyStartIdx = fullName.lastIndexOf(".");
-			className = fullName.substring(0, propertyStartIdx);
-			propertyName = fullName.substring(propertyStartIdx+1);
-			//TODO - <AP> exctract IConvertor from inputCellDescriptor
-			if(descriptors.length>1 && !GeneralUtil.isEmpty(descriptors[1])){
-				String convertorName = descriptors[1]; 
-				convertorName = convertorName.substring(2, convertorName.length()-1);
-				Class<?>  clazz = Class.forName(convertorName);
-				convertor = (IConvertor) clazz.newInstance();
-			}
-		}
-		public String getClassName() {return className;}//public void setClassName(String className) {this.className = className;}
-		public String getPropertyName() {return propertyName;}//public void setPropertyName(String propertyName) {this.propertyName = propertyName;}
-		public IConvertor getConvertor() {return convertor;}
-		//public void setConvertor(IConvertor convertor) {this.convertor = convertor;}
-		public String toString() {return "ClassProperty [className=" + className + ", propertyName=" + propertyName + "]";}
-	};
-
 	private HSSFWorkbook workbook;
-	//private HSSFSheet dataSheet;
 	private HSSFSheet metaSheet;
 	
 	private Map<String,ArrayList<Object>> resultMap = new HashMap<String, ArrayList<Object>>();
