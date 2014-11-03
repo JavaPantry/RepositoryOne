@@ -30,8 +30,8 @@ import ca.canon.fast.utils.GeneralUtil;
  */
 public class ExcelTemplateHelper {
 	private static Logger logger = Logger.getLogger(ExcelTemplateHelper.class);
-	private static final String errMsg = "Error in Excel parsing";
-	private static final String errMsgTmpl = "Error in Excel template";
+	private static final String ERROR_IN_PARSING = "Error in Excel parsing";
+	//private static final String ERROR_IN_TEMPLATE_PARSING = "Error in Excel template";
 	private static final String DATASHEET_SUFFIX = "_Data";
 	public enum SpreadsheetType {
 		Data("Data"), 
@@ -84,13 +84,8 @@ public class ExcelTemplateHelper {
 	public ExcelTemplateHelper(File fileToParse) throws Exception{
 		try {
 			FileInputStream inputWbStream = new FileInputStream(fileToParse);
-			//Get the workbook instance for XLS file 
 			workbook = new HSSFWorkbook(inputWbStream);
 			
-			/*dataSheet = workbook.getSheet(SpreadsheetType.Data.toString());//workbook.getSheet("Data");
-			if ( dataSheet==null){
-				throw new Exception("Template workbook must have 'Data' sheet");
-			}*/
 			metaSheet = workbook.getSheet(SpreadsheetType.MetaData.getTypeCode());//getSheet("SERVICE_SHEET");
 			if ( metaSheet ==null){
 				throw new Exception("Template workbook must have 'SERVICE_SHEET' sheet with template");
@@ -118,8 +113,6 @@ public class ExcelTemplateHelper {
 							rowTableStartIdx=rowIdx+1;		
 					}
 					if(!GeneralUtil.isEmpty(content) && content.startsWith("${")){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
-						//TODO - <AP> pass whole content to ClassProperty(content);
-						//content = content.substring(2, content.length()-1);
 						ClassProperty classProperty = new ClassProperty(content);
 						if(rowTableStartIdx==0){
 							commonPropertyMap.put(""+rowIdx+"_"+cellIdx, classProperty);
@@ -140,10 +133,10 @@ public class ExcelTemplateHelper {
 			logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
 				logger.debug(e,e);
-				throw new Exception(errMsg,e);
+				throw new Exception(ERROR_IN_PARSING,e);
 			} catch (IOException e) {
 				logger.debug(e,e);
-				throw new Exception(errMsg,e);
+				throw new Exception(ERROR_IN_PARSING,e);
 			}
 	}
 
@@ -206,19 +199,19 @@ public class ExcelTemplateHelper {
 			logger.debug("End of data sheet in workbook");
 		} catch (IllegalAccessException e) {
 			logger.debug(e,e);
-			throw new Exception(errMsg,e);
+			throw new Exception(ERROR_IN_PARSING,e);
 		} catch (InvocationTargetException e) {
 			logger.debug(e,e);
-			throw new Exception(errMsg,e);
+			throw new Exception(ERROR_IN_PARSING,e);
 		} catch (NoSuchMethodException e) {
 			logger.debug(e,e);
-			throw new Exception(errMsg,e);
+			throw new Exception(ERROR_IN_PARSING,e);
 		} catch (ClassNotFoundException e) {
 			logger.debug(e,e);
-			throw new Exception(errMsg,e);
+			throw new Exception(ERROR_IN_PARSING,e);
 		} catch (InstantiationException e) {
 			logger.debug(e,e);
-			throw new Exception(errMsg,e);
+			throw new Exception(ERROR_IN_PARSING,e);
 		}
 		return resultMap;
 	}
