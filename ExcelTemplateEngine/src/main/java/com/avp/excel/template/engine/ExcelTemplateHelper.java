@@ -24,15 +24,21 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import ca.canon.fast.utils.BeanUtility;
 import ca.canon.fast.utils.GeneralUtil;
 /**
- * v 1.3  ClassProperty extracted from ExcelTemplateHelper 
+ * v 1.3	ClassProperty extracted from ExcelTemplateHelper
+ * v 1.4	C-tor accepts type of helper (excel reader or writer)
  * @author ptitchkin
  *
  */
 public class ExcelTemplateHelper {
 	private static Logger logger = Logger.getLogger(ExcelTemplateHelper.class);
+
 	private static final String ERROR_IN_PARSING = "Error in Excel parsing";
-	//private static final String ERROR_IN_TEMPLATE_PARSING = "Error in Excel template";
+
 	private static final String DATASHEET_SUFFIX = "_Data";
+
+	private static final String PARSE_FOR_READING = "PARSE_FOR_READING"; 
+	private static final String PARSE_FOR_WRITING = "PARSE_FOR_WRITING";
+			
 	public enum SpreadsheetType {
 		Data("Data"), 
 		MetaData("SERVICE_SHEET");
