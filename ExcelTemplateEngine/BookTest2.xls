@@ -1,0 +1,52 @@
+<table>
+ <tr bgcolor="#FF0000">
+  <td>dealerId</td>
+  <td>DealerCode</td>
+  <td>DealerName</td>
+  <td>Status</td>
+  <td>HasDefaultAllocation</td>
+  <td>HasForecast</td>
+  <td>HasSellHand</td>
+  <td>HasQuota</td>
+ </tr>
+ <tr bgcolor="#00FF00" >
+  <td>1</td>
+  <td>2</td>
+  <td>3</td>
+  <td>4</td>
+  <td>5</td>
+  <td>6</td>
+  <td>7</td>
+  <td>8</td>
+ </tr>
+ <tr>
+   <td>1</td>
+   <td>2</td>
+   <td>3</td>
+   <td>4</td>
+   <td>5</td>
+   <td>6</td>
+   <td>7</td>
+   <td>8</td>
+ </tr>
+ <tr bgcolor="#00FF00" >
+  <td>1</td>
+  <td>2</td>
+  <td>3</td>
+  <td>4</td>
+  <td>5</td>
+  <td>6</td>
+  <td>7</td>
+  <td>8</td>
+ </tr>
+ <tr bgcolor="#0000FF" >
+  <td>1</td>
+  <td>2</td>
+  <td>3</td>
+  <td>4</td>
+  <td>5</td>
+  <td>=SUM(F2:F4)</td>
+  <td>7</td>
+  <td>8</td>
+ </tr> 
+</table>
