@@ -77,11 +77,11 @@ public class BeanUtility {
 				}else if(value!=null){
 					Object dstValue = PropertyUtils.getProperty(dst, key);
 					if(PropertyUtils.isWriteable(dst, key)){
-					//if((value instanceof Integer) && ((Integer)value).intValue()==0){
+					// if((value instanceof Integer) && ((Integer)value).intValue()==0){
 						// do nothing to protect not null data
-					//}else{
+					// }else{
 						PropertyUtils.setProperty(dst, key, value);
-					//}
+					// }
 					}
 				}
 			}
