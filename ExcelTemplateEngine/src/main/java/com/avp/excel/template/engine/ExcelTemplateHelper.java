@@ -115,13 +115,18 @@ public class ExcelTemplateHelper {
 					if(cell.getCellType() == HSSFCell.CELL_TYPE_STRING){
 	                	content = cell.getStringCellValue();
 					}
-					if(!GeneralUtil.isEmpty(content) && content.startsWith(".{")){ // .{table:start} or .{table:end}
+					
+					if(GeneralUtil.isEmpty(content)){
+						cellIdx++;//don't forget to increment so next pass will point next cell
+						continue;
+					}
+					if(content.startsWith(".{")){ // .{table:start} or .{table:end}
 						content = content.substring(2, content.length()-1);
 						String[] cmd = content.split(":");
 						if(cmd[0].equalsIgnoreCase("table") && cmd[1].equalsIgnoreCase("start"))
 							rowTableStartIdx=rowIdx+1;		
 					}
-					if(!GeneralUtil.isEmpty(content) && content.startsWith("${")){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
+					if(content.startsWith("${")){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
 						//TODO - <AP> pass whole content to ClassProperty(content);
 						//content = content.substring(2, content.length()-1);
 						ClassProperty classProperty = new ClassProperty(content);
@@ -137,12 +142,13 @@ public class ExcelTemplateHelper {
 							commonMap.put(classProperty.getClassName(),new ArrayList<Object>());
 						}
 					}
-					cellIdx++;
-				}
-				rowIdx++;
-			}
-			excludeArray = getExcludeFields(tablePropertyMap);
+					cellIdx++; //next pass will point next cell
+				}//eof while(cellIterator.hasNext())
+				rowIdx++; //next pass will point next row
+			}//eof while(rowIterator.hasNext())
 			
+			//store properties which will not copied from header bean
+			excludeArray = getExcludeFields(tablePropertyMap);
 			logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
 				logger.debug(e,e);
