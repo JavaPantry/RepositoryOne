@@ -175,9 +175,9 @@ public class ExcelTemplateHelper {
 			if(sheetName.endsWith(DATASHEET_SUFFIX)){
 				//TODO - <AP> - resetParser destroy data collected on previous pass. WTF?!!!  
 				resetParser();
-				Map<String, ArrayList<Object>> parsedSheetClasses = parseDataSheet(workbook.getSheetAt(sheetIdx));
+				Map<String, ArrayList<Object>> objectsFromDataSheet = parseDataSheet(workbook.getSheetAt(sheetIdx));
 				String dataName = sheetName.substring(0,sheetName.indexOf(DATASHEET_SUFFIX));
-				mapOfSheets.put(dataName, parsedSheetClasses);
+				mapOfSheets.put(dataName, objectsFromDataSheet);
 			}
 		}
 		return mapOfSheets;
@@ -270,9 +270,32 @@ public class ExcelTemplateHelper {
 		}
 		
 	}
-	private Object pushRowToEntity(HashMap<String, ClassProperty> propertyMap, Map<String,ArrayList<Object>> collectedMap, Object entity, int rowIdx,  HSSFRow row) throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException{
-		Iterator<HSSFCell> cellIterator = row.cellIterator();
+	/**
+	 * create instance of object (if not passed in) and populate properties from cells (described in template) 
+	 * return null if row is empty (null might trigger end of table)
+	 * @param propertyMap
+	 * @param collectedMap
+	 * @param entity
+	 * @param rowIdx
+	 * @param row
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 */
+	private Object pushRowToEntity(HashMap<String, ClassProperty> propertyMap, 
+											Map<String,ArrayList<Object>> collectedMap, 
+											Object entity, 
+											int rowIdx,  
+											HSSFRow row) throws ClassNotFoundException, InstantiationException, 
+																IllegalAccessException, InvocationTargetException, 
+																NoSuchMethodException{
+		boolean isRowEmpty = true;
 		int cellIdx = 0;
+		
+		Iterator<HSSFCell> cellIterator = row.cellIterator();
 		while(cellIterator.hasNext()){
 			HSSFCell cell = cellIterator.next();
 			String key=""+rowIdx+"_"+cellIdx;
@@ -288,9 +311,15 @@ public class ExcelTemplateHelper {
 				cellIdx++;
 				continue;
 			}
-			pushCellToEntity(entity, cell, classProperty);
+			
+			if(!GeneralUtil.isEmpty(cell.toString())){
+				isRowEmpty = false;
+				pushCellToEntity(entity, cell, classProperty);
+			}
 			cellIdx++;
 		}
+		if(isRowEmpty)
+			return null;
 		return entity;
 	}
 	private void pushCellToEntity(Object entity, HSSFCell cell, ClassProperty classProperty) throws IllegalAccessException,	InvocationTargetException, NoSuchMethodException {
