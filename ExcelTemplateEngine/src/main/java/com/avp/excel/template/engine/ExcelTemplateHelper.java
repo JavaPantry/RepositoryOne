@@ -27,6 +27,7 @@ import ca.canon.fast.utils.GeneralUtil;
 /**
  * v 1.3	ClassProperty extracted from ExcelTemplateHelper
  * v 1.4	C-tor accepts type of helper (excel reader or writer)
+ * v 1.5	Merge GitHub and FaST progect versions into Refactoring branch
  * @author ptitchkin
  *
  */
