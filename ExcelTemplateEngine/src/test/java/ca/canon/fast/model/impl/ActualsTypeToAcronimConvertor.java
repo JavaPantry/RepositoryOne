@@ -1,4 +1,7 @@
-package com.avp.excel.template.engine;
+package ca.canon.fast.model.impl;
+
+import com.avp.excel.template.engine.IConvertor;
+
 /**
  * insert as optional '...,${com.avp.excel.template.engine.MonthToIntegerConvertor}'
  * @author ptitchkin

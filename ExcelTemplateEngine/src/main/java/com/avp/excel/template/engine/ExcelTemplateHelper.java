@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +39,7 @@ public class ExcelTemplateHelper {
 
 	private static final String PARSE_FOR_READING = "PARSE_FOR_READING"; 
 	private static final String PARSE_FOR_WRITING = "PARSE_FOR_WRITING";
-			
+
 	public enum SpreadsheetType {
 		Data("Data"), 
 		MetaData("SERVICE_SHEET");
@@ -55,6 +56,7 @@ public class ExcelTemplateHelper {
 	
 	private Map<String,ArrayList<Object>> resultMap = new HashMap<String, ArrayList<Object>>();
 	private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
+	private String[] excludeArray = null;
 	
 	private Map<String,ArrayList<Object>> commonMap = new HashMap<String, ArrayList<Object>>();
 	private HashMap<String, ClassProperty> commonPropertyMap = new HashMap<String, ClassProperty>();
@@ -90,13 +92,13 @@ public class ExcelTemplateHelper {
 	public ExcelTemplateHelper(File fileToParse) throws Exception{
 		try {
 			FileInputStream inputWbStream = new FileInputStream(fileToParse);
+			//Get the workbook instance for XLS file 
 			workbook = new HSSFWorkbook(inputWbStream);
 			
 			metaSheet = workbook.getSheet(SpreadsheetType.MetaData.getTypeCode());//getSheet("SERVICE_SHEET");
 			if ( metaSheet ==null){
 				throw new Exception("Template workbook must have 'SERVICE_SHEET' sheet with template");
 			}
-
 			Iterator<HSSFRow> rowIterator = metaSheet.rowIterator();
 			int rowIdx = 0;
 			rowTableStartIdx = 0;
@@ -119,6 +121,8 @@ public class ExcelTemplateHelper {
 							rowTableStartIdx=rowIdx+1;		
 					}
 					if(!GeneralUtil.isEmpty(content) && content.startsWith("${")){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
+						//TODO - <AP> pass whole content to ClassProperty(content);
+						//content = content.substring(2, content.length()-1);
 						ClassProperty classProperty = new ClassProperty(content);
 						if(rowTableStartIdx==0){
 							commonPropertyMap.put(""+rowIdx+"_"+cellIdx, classProperty);
@@ -136,6 +140,8 @@ public class ExcelTemplateHelper {
 				}
 				rowIdx++;
 			}
+			excludeArray = getExcludeFields(tablePropertyMap);
+			
 			logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
 				logger.debug(e,e);
@@ -222,6 +228,29 @@ public class ExcelTemplateHelper {
 		return resultMap;
 	}
 
+	
+	private String[] getExcludeFields(HashMap<String, ClassProperty> tablePropertyMap){
+		//common fields are taken from header of the sheet (they exists only in header and are not exists in table)
+		//collect exclude fields (fields in tablePropertyMap are excluded from when populate entity from commonEntity)
+		List<String> exludeFields = new ArrayList<String>();
+		Set<String> propertyKeys = tablePropertyMap.keySet();
+		boolean first = true;
+		for (String key : propertyKeys) { 
+			ClassProperty classProperty = tablePropertyMap.get(key);
+			String propertyName = classProperty.getPropertyName();
+			if(first){
+				propertyName = "+"+propertyName;
+				first = false;
+			}
+			exludeFields.add(propertyName);
+		}
+		String[] excludeArray = new String[exludeFields.size()];
+		for (int i = 0; i < excludeArray.length; i++) {
+			excludeArray[i] = exludeFields.get(i);					
+		}
+		return excludeArray;
+	}
+	
 	private void populateCommonFields(Object entity) {
 		//find same class in commonMap
 		Set<String> keys = commonMap.keySet();
@@ -229,7 +258,7 @@ public class ExcelTemplateHelper {
 			if(entity.getClass().getName().equals(key)){
 				ArrayList<Object> srcList = commonMap.get(key);
 				Object src = srcList.get(0);
-				BeanUtility.nullSafeMergeTo(src, entity, null);
+				BeanUtility.nullSafeMergeTo(src, entity, excludeArray);
 			}
 		}
 		
