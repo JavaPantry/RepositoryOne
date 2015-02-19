@@ -26,7 +26,7 @@ import ca.canon.fast.utils.BeanUtility;
 import ca.canon.fast.utils.GeneralUtil;
 /**
  * 
- * entities that might be detected in spreadsheet must implement equal() and hashCode() 
+ * Please note: - entities that might be detected in spreadsheet must implement equal() and hashCode() 
  * 
  * v 1.3	ClassProperty extracted from ExcelTemplateHelper
  * v 1.4	C-tor accepts type of helper (excel reader or writer)
@@ -60,36 +60,37 @@ public class ExcelTemplateHelper {
 	private HSSFSheet metaSheet;
 	
 	private Map<String,ArrayList<Object>> resultMap = new HashMap<String, ArrayList<Object>>();
+	private Map<String,ArrayList<Object>> commonMap = new HashMap<String, ArrayList<Object>>();
+
 	private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
 	private String[] excludeArray = null;
 	
-	private Map<String,ArrayList<Object>> commonMap = new HashMap<String, ArrayList<Object>>();
 	private HashMap<String, ClassProperty> commonPropertyMap = new HashMap<String, ClassProperty>();
 	
-	private Object commonEntity = null;
 	private int rowTableStartIdx = 0;
 	
 	private void resetParser(){
-		commonEntity = null;
-		
-		Map<String,ArrayList<Object>> newCommonMap = new HashMap<String, ArrayList<Object>>();
-		Set<String> keySet = commonMap.keySet(); //= new HashMap<String, ArrayList<Object>>();
+		commonMap = resetEntityMap(commonMap);
+		resultMap = resetEntityMap(resultMap);
+	}
+	
+	private Map<String, ArrayList<Object>> resetEntityMap(Map<String, ArrayList<Object>> mapToReset) {
+		Map<String,ArrayList<Object>> newMap = new HashMap<String, ArrayList<Object>>();
+		Set<String> keySet = mapToReset.keySet();
 		for (String key : keySet) {
-			newCommonMap.put(key, new ArrayList<Object>());
+			newMap.put(key, new ArrayList<Object>());
 		}
-		commonMap = newCommonMap;
-		
-		Map<String,ArrayList<Object>> newResultMap = new HashMap<String, ArrayList<Object>>();
-		keySet = resultMap.keySet();//resultMap = new HashMap<String, ArrayList<Object>>();
-		for (String key : keySet) {
-			newResultMap.put(key, new ArrayList<Object>());
-		}
-		resultMap = newResultMap;
-		
+		return newMap;
 	}
 	/**
 	 * constructor parse template sheet "SERVICE_SHEET"
 	 * current implementation support only one table per workbook
+	 * 
+	 * C-tor collect two maps: 
+	 * - Map<String,ArrayList<Object>> resultMap = new HashMap<String, ArrayList<Object>>();
+	 * where parser will collect entities from table 
+	 * - Map<String,ArrayList<Object>> commonMap = new HashMap<String, ArrayList<Object>>();
+	 * where parser will collect entities from header
 	 * 
 	 * @param fileToParse
 	 * @throws Exception
@@ -199,6 +200,7 @@ public class ExcelTemplateHelper {
 	 */
 	@SuppressWarnings({ "unused", "unchecked" })
 	public Map<String,ArrayList<Object>> parseDataSheet(HSSFSheet dataSheet) throws Exception {
+		Object tmpDummyCommonEntity = null;
 		try{
 			//this.logSheetData(resultMap);
 			Iterator<HSSFRow> rowIterator = dataSheet.rowIterator();
@@ -207,7 +209,7 @@ public class ExcelTemplateHelper {
 				HSSFRow row = rowIterator.next();
 				if(rowIdx < rowTableStartIdx){
 					//collect common fields before table body  TODO - <AP> because of assigment any empty row before table body will reset commonEntity
-					commonEntity = pushRowToEntity(commonPropertyMap, commonMap, commonEntity, rowIdx, row);
+					tmpDummyCommonEntity = pushRowToEntity(commonPropertyMap, commonMap, tmpDummyCommonEntity, rowIdx, row);
 					rowIdx++;
 					continue;
 				}
@@ -215,7 +217,7 @@ public class ExcelTemplateHelper {
 				Object entity = pushRowToEntity(tablePropertyMap, resultMap, null, rowTableStartIdx, row);
 				if(entity == null)//TODO - <AP> any other valid way to detect end of data?
 					break;
-				populateCommonFields(entity);
+				populateCommonFields(entity);//(commonEntity, entity);
 				rowIdx++;
 			}
 			logger.debug("End of data sheet in workbook");
@@ -275,7 +277,7 @@ public class ExcelTemplateHelper {
 		return excludeArray;
 	}
 	
-	private void populateCommonFields(Object entity) {
+	private void populateCommonFields(Object entity) { 
 		//find same class in commonMap
 		Set<String> keys = commonMap.keySet();
 		for (String key : keys) {
