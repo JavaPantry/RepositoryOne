@@ -39,13 +39,15 @@ public class ExcelTemplateHelperTest {
 		Set<String> sheetKeySet = resultMap.keySet();
 		for (String sheetKey : sheetKeySet) {
 			Map<String, ArrayList<Object>> result = resultMap.get(sheetKey);
-			Set<String> keySet = result.keySet();
+			exelTpl.logSheetData(result);
+			/*Set<String> keySet = result.keySet();
 			for (String key : keySet) {
 				 ArrayList<Object> entities = result.get(key);
 				 for (Object entity : entities) {
 					logger.debug(entity.toString());
 				}
 			}//eofor keySet
+			*/
 		}//eofor sheetKeySet
 	}
 }

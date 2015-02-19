@@ -25,9 +25,13 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import ca.canon.fast.utils.BeanUtility;
 import ca.canon.fast.utils.GeneralUtil;
 /**
+ * 
+ * entities that might be detected in spreadsheet must implement equal() and hashCode() 
+ * 
  * v 1.3	ClassProperty extracted from ExcelTemplateHelper
  * v 1.4	C-tor accepts type of helper (excel reader or writer)
  * v 1.5	Merge GitHub and FaST progect versions into Refactoring branch
+ * v 1.6    Error: Empty row in collected data from table
  * @author ptitchkin
  *
  */
@@ -182,9 +186,8 @@ public class ExcelTemplateHelper {
 		}
 		return mapOfSheets;
 	}
-
+	
 	/**
-	 * 
 	 * parse "Data" sheet based on template sheet "SERVICE_SHEET" acquired in c-tor
 	 * 
 	 * @param fileToParse   
@@ -197,7 +200,7 @@ public class ExcelTemplateHelper {
 	@SuppressWarnings({ "unused", "unchecked" })
 	public Map<String,ArrayList<Object>> parseDataSheet(HSSFSheet dataSheet) throws Exception {
 		try{
-			//ArrayList<Object> entities = new ArrayList<Object>();
+			//this.logSheetData(resultMap);
 			Iterator<HSSFRow> rowIterator = dataSheet.rowIterator();
 			int rowIdx = 0;
 			while(rowIterator.hasNext()){
@@ -232,9 +235,23 @@ public class ExcelTemplateHelper {
 			logger.debug(e,e);
 			throw new Exception(ERROR_IN_PARSING,e);
 		}
+		//this.logSheetData(resultMap);
 		return resultMap;
-	}
+	}//eof parseDataSheet(...
 
+	/**
+	 * Log data from parsed sheet 
+	 * @param objectsFromDataSheet - map of collections for each recognized type
+	 */
+	public void logSheetData(Map<String, ArrayList<Object>> objectsFromDataSheet){
+		Set<String> keySet = objectsFromDataSheet.keySet();
+		for (String key : keySet) {
+			 ArrayList<Object> entities = objectsFromDataSheet.get(key);
+			 for (Object entity : entities) {
+				logger.debug(entity.toString());
+			}
+		}//eofor keySet
+	}//eof logSheetData(...
 	
 	private String[] getExcludeFields(HashMap<String, ClassProperty> tablePropertyMap){
 		//common fields are taken from header of the sheet (they exists only in header and are not exists in table)
@@ -308,13 +325,16 @@ public class ExcelTemplateHelper {
 			if (entity == null){
 				Class<?>  clazz = Class.forName(classProperty.getClassName());
 				entity = clazz.newInstance();
-				//TODO - <AP> what if collectedMap does NOT contain class name? It's not possible because 1-st pass should collect all classes 
-				ArrayList<Object> entities = collectedMap.get(classProperty.getClassName());
-				entities.add(entity);
 			}
 			if(!GeneralUtil.isEmpty(cell.toString())){
 				isRowEmpty = false;
 				pushCellToEntity(entity, cell, classProperty);
+				
+				//TODO - <AP> what if collectedMap does NOT contain class name? It's not possible because 1-st pass should collect all classes
+				ArrayList<Object> entities = collectedMap.get(classProperty.getClassName());
+				if(!entities.contains(entity)){
+				entities.add(entity);
+				}// if cell not empty
 			}
 			cellIdx++;
 		}

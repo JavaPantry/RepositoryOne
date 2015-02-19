@@ -4,6 +4,62 @@ package ca.canon.fast.model.impl;
 @SuppressWarnings("serial")
 public class SalesUploadWeekFct extends BaseAuditEntity{
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((actualType == null) ? 0 : actualType.hashCode());
+		result = prime * result + ((billTo == null) ? 0 : billTo.hashCode());
+		result = prime * result
+				+ ((itemCode == null) ? 0 : itemCode.hashCode());
+		result = prime * result + ((month == null) ? 0 : month.hashCode());
+		result = prime * result + ((sellTo == null) ? 0 : sellTo.hashCode());
+		result = prime * result + ((year == null) ? 0 : year.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SalesUploadWeekFct other = (SalesUploadWeekFct) obj;
+		if (actualType == null) {
+			if (other.actualType != null)
+				return false;
+		} else if (!actualType.equals(other.actualType))
+			return false;
+		if (billTo == null) {
+			if (other.billTo != null)
+				return false;
+		} else if (!billTo.equals(other.billTo))
+			return false;
+		if (itemCode == null) {
+			if (other.itemCode != null)
+				return false;
+		} else if (!itemCode.equals(other.itemCode))
+			return false;
+		if (month == null) {
+			if (other.month != null)
+				return false;
+		} else if (!month.equals(other.month))
+			return false;
+		if (sellTo == null) {
+			if (other.sellTo != null)
+				return false;
+		} else if (!sellTo.equals(other.sellTo))
+			return false;
+		if (year == null) {
+			if (other.year != null)
+				return false;
+		} else if (!year.equals(other.year))
+			return false;
+		return true;
+	}
 	private Boolean oddity; 
 	private Integer year;
 	private Integer month;
