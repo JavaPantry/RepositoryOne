@@ -59,11 +59,19 @@ public class ExcelTemplateHelper {
 	private HSSFWorkbook workbook;
 	private HSSFSheet metaSheet;
 	
+	/**
+	 * 	resultMap and commonMap are used to store parsing result done in c-tor ExcelTemplateHelper(File fileToParse) 
+	 *	shared between spreadsheet processing
+	 */
 	private Map<String,ArrayList<Object>> resultMap = new HashMap<String, ArrayList<Object>>();
 	private Map<String,ArrayList<Object>> commonMap = new HashMap<String, ArrayList<Object>>();
 
-	private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
+	/**
+	 * 	store properties which will not copied from header bean to table enteties
+	 */
 	private String[] excludeArray = null;
+
+	private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
 	
 	private HashMap<String, ClassProperty> commonPropertyMap = new HashMap<String, ClassProperty>();
 	
@@ -152,7 +160,6 @@ public class ExcelTemplateHelper {
 				rowIdx++; //next pass will point next row
 			}//eof while(rowIterator.hasNext())
 			
-			//store properties which will not copied from header bean
 			excludeArray = getExcludeFields(tablePropertyMap);
 			logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
