@@ -203,7 +203,7 @@ public class ExcelTemplateHelper {
 			while(rowIterator.hasNext()){
 				HSSFRow row = rowIterator.next();
 				if(rowIdx < rowTableStartIdx){
-					//TODO - <AP> attempt to collect common fields before table body
+					//collect common fields before table body  TODO - <AP> because of assigment any empty row before table body will reset commonEntity
 					commonEntity = pushRowToEntity(commonPropertyMap, commonMap, commonEntity, rowIdx, row);
 					rowIdx++;
 					continue;
@@ -300,18 +300,18 @@ public class ExcelTemplateHelper {
 			HSSFCell cell = cellIterator.next();
 			String key=""+rowIdx+"_"+cellIdx;
 			ClassProperty classProperty = propertyMap.get(key);
-			if (entity == null && classProperty != null){
-				Class<?>  clazz = Class.forName(classProperty.getClassName());
-				entity = clazz.newInstance();
-				//describePropertiesTypes(entity,tablePropertyMap);
-				ArrayList<Object> entities = collectedMap.get(classProperty.getClassName());
-				entities.add(entity);
-			}
 			if(classProperty == null){
 				cellIdx++;
 				continue;
 			}
 			
+			if (entity == null){
+				Class<?>  clazz = Class.forName(classProperty.getClassName());
+				entity = clazz.newInstance();
+				//TODO - <AP> what if collectedMap does NOT contain class name? It's not possible because 1-st pass should collect all classes 
+				ArrayList<Object> entities = collectedMap.get(classProperty.getClassName());
+				entities.add(entity);
+			}
 			if(!GeneralUtil.isEmpty(cell.toString())){
 				isRowEmpty = false;
 				pushCellToEntity(entity, cell, classProperty);
