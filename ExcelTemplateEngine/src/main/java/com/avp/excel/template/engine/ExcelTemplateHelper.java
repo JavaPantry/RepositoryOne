@@ -18,9 +18,10 @@ import org.apache.commons.beanutils.converters.IntegerConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 
 import ca.canon.fast.utils.BeanUtility;
 import ca.canon.fast.utils.GeneralUtil;
@@ -113,16 +114,16 @@ public class ExcelTemplateHelper {
 			if ( metaSheet ==null){
 				throw new Exception("Template workbook must have 'SERVICE_SHEET' sheet with template");
 			}
-			Iterator<HSSFRow> rowIterator = metaSheet.rowIterator();
+			Iterator<Row> rowIterator = metaSheet.rowIterator();
 			int rowIdx = 0;
 			rowTableStartIdx = 0;
 			  
 			while(rowIterator.hasNext()){
-				HSSFRow row = rowIterator.next();
-				Iterator<HSSFCell> cellIterator = row.cellIterator();
+				Row row = rowIterator.next();
+				Iterator<Cell> cellIterator = row.cellIterator();
 				int cellIdx = 0;
 				while(cellIterator.hasNext()){
-					HSSFCell cell = cellIterator.next();
+					Cell cell = cellIterator.next();
 					
 					String content = "";
 					if(cell.getCellType() == HSSFCell.CELL_TYPE_STRING){
@@ -210,10 +211,10 @@ public class ExcelTemplateHelper {
 		Object tmpDummyCommonEntity = null;
 		try{
 			//this.logSheetData(resultMap);
-			Iterator<HSSFRow> rowIterator = dataSheet.rowIterator();
+			Iterator<Row> rowIterator = dataSheet.rowIterator();
 			int rowIdx = 0;
 			while(rowIterator.hasNext()){
-				HSSFRow row = rowIterator.next();
+				Row row = rowIterator.next();
 				if(rowIdx < rowTableStartIdx){
 					//collect common fields before table body  TODO - <AP> because of assigment any empty row before table body will reset commonEntity
 					tmpDummyCommonEntity = pushRowToEntity(commonPropertyMap, commonMap, tmpDummyCommonEntity, rowIdx, row);
@@ -315,15 +316,15 @@ public class ExcelTemplateHelper {
 											Map<String,ArrayList<Object>> collectedMap, 
 											Object entity, 
 											int rowIdx,  
-											HSSFRow row) throws ClassNotFoundException, InstantiationException, 
+											Row row) throws ClassNotFoundException, InstantiationException, 
 																IllegalAccessException, InvocationTargetException, 
 																NoSuchMethodException{
 		boolean isRowEmpty = true;
 		int cellIdx = 0;
 		
-		Iterator<HSSFCell> cellIterator = row.cellIterator();
+		Iterator<Cell> cellIterator = row.cellIterator();
 		while(cellIterator.hasNext()){
-			HSSFCell cell = cellIterator.next();
+			Cell cell = cellIterator.next();
 			String key=""+rowIdx+"_"+cellIdx;
 			ClassProperty classProperty = propertyMap.get(key);
 			if(classProperty == null){
@@ -351,7 +352,7 @@ public class ExcelTemplateHelper {
 			return null;
 		return entity;
 	}
-	private void pushCellToEntity(Object entity, HSSFCell cell, ClassProperty classProperty) throws IllegalAccessException,	InvocationTargetException, NoSuchMethodException {
+	private void pushCellToEntity(Object entity, Cell cell, ClassProperty classProperty) throws IllegalAccessException,	InvocationTargetException, NoSuchMethodException {
 		switch(cell.getCellType()) {
 		    case HSSFCell.CELL_TYPE_BOOLEAN:
 		    	Boolean boolValue = new Boolean(cell.getBooleanCellValue());
