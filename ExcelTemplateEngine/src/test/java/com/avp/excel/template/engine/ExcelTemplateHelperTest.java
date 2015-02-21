@@ -29,9 +29,22 @@ public class ExcelTemplateHelperTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+/* wait for version # 0.2
 	@Test
-	public void testParseWeekActuals() throws Exception {
+	public void testParseExcelDataExt() throws Exception {
+		File forecastTemplate = new File("ForecastTemplateExt.xls");
+		ExcelTemplateHelper exelTpl = new ExcelTemplateHelper(forecastTemplate);
+		Map<String, Map<String, ArrayList<Object>>> resultMap = exelTpl.parseDataSheets();
+	//TODO - <AP> need to validate data	
+		Set<String> sheetKeySet = resultMap.keySet();
+		for (String sheetKey : sheetKeySet) {
+		
+			Map<String, ArrayList<Object>> result = resultMap.get(sheetKey);
+			exelTpl.logSheetData(result);
+		}//eofor sheetKeySet
+	}*/
+	@Test
+	public void testParseExcelData() throws Exception {
 		File forecastTemplate = new File("ForecastTemplate.xls");
 		ExcelTemplateHelper exelTpl = new ExcelTemplateHelper(forecastTemplate);
 		Map<String, Map<String, ArrayList<Object>>> resultMap = exelTpl.parseDataSheets();
