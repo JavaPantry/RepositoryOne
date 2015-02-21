@@ -164,10 +164,10 @@ public class ExcelTemplateHelper {
 			excludeArray = getExcludeFields(tablePropertyMap);
 			logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
-				logger.debug(e,e);
+				logger.error(e,e);
 				throw new Exception(ERROR_IN_PARSING,e);
 			} catch (IOException e) {
-				logger.debug(e,e);
+				logger.error(e,e);
 				throw new Exception(ERROR_IN_PARSING,e);
 			}
 	}
@@ -230,19 +230,19 @@ public class ExcelTemplateHelper {
 			}
 			logger.debug("End of data sheet in workbook");
 		} catch (IllegalAccessException e) {
-			logger.debug(e,e);
+			logger.error(e,e);
 			throw new Exception(ERROR_IN_PARSING,e);
 		} catch (InvocationTargetException e) {
-			logger.debug(e,e);
+			logger.error(e,e);
 			throw new Exception(ERROR_IN_PARSING,e);
 		} catch (NoSuchMethodException e) {
-			logger.debug(e,e);
+			logger.error(e,e);
 			throw new Exception(ERROR_IN_PARSING,e);
 		} catch (ClassNotFoundException e) {
-			logger.debug(e,e);
+			logger.error(e,e);
 			throw new Exception(ERROR_IN_PARSING,e);
 		} catch (InstantiationException e) {
-			logger.debug(e,e);
+			logger.error(e,e);
 			throw new Exception(ERROR_IN_PARSING,e);
 		}
 		//this.logSheetData(resultMap);

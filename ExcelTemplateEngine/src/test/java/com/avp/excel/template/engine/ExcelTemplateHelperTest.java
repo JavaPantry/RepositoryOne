@@ -29,7 +29,8 @@ public class ExcelTemplateHelperTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-/* wait for version # 0.2
+	
+	
 	@Test
 	public void testParseExcelDataExt() throws Exception {
 		File forecastTemplate = new File("ForecastTemplateExt.xls");
@@ -38,11 +39,12 @@ public class ExcelTemplateHelperTest {
 	//TODO - <AP> need to validate data	
 		Set<String> sheetKeySet = resultMap.keySet();
 		for (String sheetKey : sheetKeySet) {
-		
+			logger.debug(sheetKey +" data sheet in workbook");
 			Map<String, ArrayList<Object>> result = resultMap.get(sheetKey);
 			exelTpl.logSheetData(result);
 		}//eofor sheetKeySet
-	}*/
+	}
+	
 	@Test
 	public void testParseExcelData() throws Exception {
 		File forecastTemplate = new File("ForecastTemplate.xls");
@@ -51,6 +53,7 @@ public class ExcelTemplateHelperTest {
 	//TODO - <AP> need to validate data	
 		Set<String> sheetKeySet = resultMap.keySet();
 		for (String sheetKey : sheetKeySet) {
+			logger.debug(sheetKey +" data sheet in workbook");
 			Map<String, ArrayList<Object>> result = resultMap.get(sheetKey);
 			exelTpl.logSheetData(result);
 		}//eofor sheetKeySet
