@@ -10,12 +10,15 @@ public class ClassProperty{
 	/* 
 	 * TODO - <AP> exctract IConvertor from inputCellDescriptor
 	 * very naive implementation 
-	 * input: ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName
+	 * input: 
 	 * className: ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO
 	 * propertyName:userName
 	 * 
 	 */
-	public ClassProperty(String inputCellDescriptor) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public ClassProperty(TableDescriptor td, String inputCellDescriptor) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+		if(td.getDefaultClassName() != null){
+			className = td.getDefaultClassName();
+		}
 		String descriptors[] = inputCellDescriptor.split(",");
 		String fullName = descriptors[0];
 		fullName = fullName.substring(2, fullName.length()-1);

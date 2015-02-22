@@ -29,10 +29,15 @@ import ca.canon.fast.utils.GeneralUtil;
  * 
  * Please note: - entities that might be detected in spreadsheet must implement equal() and hashCode() 
  * 
- * v 1.3	ClassProperty extracted from ExcelTemplateHelper
- * v 1.4	C-tor accepts type of helper (excel reader or writer)
- * v 1.5	Merge GitHub and FaST progect versions into Refactoring branch
- * v 1.6    Error: Empty row in collected data from table
+ * History:
+ * v 0.0.3	ClassProperty extracted from ExcelTemplateHelper
+ * v 0.0.4	C-tor accepts type of helper (excel reader or writer)
+ * v 0.0.5	Merge GitHub and FaST progect versions into Refactoring branch
+ * v 0.0.6  Fix Error: Empty row in collected data from table
+ * tag version # 0.1
+ * v 0.1.1  Introduce TableDescriptor  
+ * 
+ * 
  * @author ptitchkin
  *
  */
@@ -42,13 +47,18 @@ public class ExcelTemplateHelper {
 	private static final String ERROR_IN_PARSING = "Error in Excel parsing";
 
 	private static final String DATASHEET_SUFFIX = "_Data";
+	private static final String SERVICE_SHEET = "SERVICE_SHEET";
 
 	private static final String PARSE_FOR_READING = "PARSE_FOR_READING"; 
 	private static final String PARSE_FOR_WRITING = "PARSE_FOR_WRITING";
 
+	/**
+	 * inline enum for spreadsheet type distinct 'XXXXX_Data' and 'SERVICE_SHEET' 
+	 * not sure if I need it here at all
+	 */
 	public enum SpreadsheetType {
-		Data("Data"), 
-		MetaData("SERVICE_SHEET");
+		Data(DATASHEET_SUFFIX), 
+		MetaData(SERVICE_SHEET);
 		private String typeCode;
 		
 		SpreadsheetType(String type){typeCode = type;}
@@ -60,6 +70,10 @@ public class ExcelTemplateHelper {
 	private HSSFWorkbook workbook;
 	private HSSFSheet metaSheet;
 	
+	private List<TableDescriptor> tables = new ArrayList<TableDescriptor>();
+	public List<TableDescriptor> getTables() {return tables;}
+	public void setTables(List<TableDescriptor> tables) {this.tables = tables;}  
+
 	/**
 	 * 	resultMap and commonMap are used to store parsing result done in c-tor ExcelTemplateHelper(File fileToParse) 
 	 *	shared between spreadsheet processing
@@ -109,8 +123,9 @@ public class ExcelTemplateHelper {
 			FileInputStream inputWbStream = new FileInputStream(fileToParse);
 			//Get the workbook instance for XLS file 
 			workbook = new HSSFWorkbook(inputWbStream);
-			
 			metaSheet = workbook.getSheet(SpreadsheetType.MetaData.getTypeCode());//getSheet("SERVICE_SHEET");
+			TableDescriptor td = null;
+
 			if ( metaSheet ==null){
 				throw new Exception("Template workbook must have 'SERVICE_SHEET' sheet with template");
 			}
@@ -135,15 +150,17 @@ public class ExcelTemplateHelper {
 						continue;
 					}
 					if(content.startsWith(".{")){ // .{table:start} or .{table:end}
-						content = content.substring(2, content.length()-1);
+						td = new TableDescriptor(content); 
+						content = content.substring(2, content.length()-1); // remove starting '.{' and trailing '}'
 						String[] cmd = content.split(":");
 						if(cmd[0].equalsIgnoreCase("table") && cmd[1].equalsIgnoreCase("start"))
 							rowTableStartIdx=rowIdx+1;		
 					}
+					
 					if(content.startsWith("${")){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
 						//TODO - <AP> pass whole content to ClassProperty(content);
 						//content = content.substring(2, content.length()-1);
-						ClassProperty classProperty = new ClassProperty(content);
+						ClassProperty classProperty = new ClassProperty(td, content);
 						if(rowTableStartIdx==0){
 							commonPropertyMap.put(""+rowIdx+"_"+cellIdx, classProperty);
 						}else{
@@ -207,7 +224,7 @@ public class ExcelTemplateHelper {
 	 * @throws Exception 
 	 */
 	@SuppressWarnings({ "unused", "unchecked" })
-	public Map<String,ArrayList<Object>> parseDataSheet(HSSFSheet dataSheet) throws Exception {
+	private Map<String,ArrayList<Object>> parseDataSheet(HSSFSheet dataSheet) throws Exception {
 		Object tmpDummyCommonEntity = null;
 		try{
 			//this.logSheetData(resultMap);
@@ -216,7 +233,7 @@ public class ExcelTemplateHelper {
 			while(rowIterator.hasNext()){
 				Row row = rowIterator.next();
 				if(rowIdx < rowTableStartIdx){
-					//collect common fields before table body  TODO - <AP> because of assigment any empty row before table body will reset commonEntity
+					//collect common fields before table body  TODO - <AP> because of assignment any empty row before table body will reset commonEntity
 					tmpDummyCommonEntity = pushRowToEntity(commonPropertyMap, commonMap, tmpDummyCommonEntity, rowIdx, row);
 					rowIdx++;
 					continue;

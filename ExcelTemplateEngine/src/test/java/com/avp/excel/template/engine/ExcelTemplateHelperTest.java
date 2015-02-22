@@ -45,7 +45,7 @@ public class ExcelTemplateHelperTest {
 		}//eofor sheetKeySet
 	}
 	
-	@Test
+	//@ Test
 	public void testParseExcelData() throws Exception {
 		File forecastTemplate = new File("ForecastTemplate.xls");
 		ExcelTemplateHelper exelTpl = new ExcelTemplateHelper(forecastTemplate);

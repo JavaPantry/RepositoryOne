@@ -15,6 +15,6 @@ import com.avp.excel.template.engine.ExcelTemplateHelperTest;
 				//,ProductByAccountEditControllerTest.class 
 				//,CommonSalesActionTest.class 
 	})
-public class AllTests {
+public class ExcelTemplateEngineAllTests {
 	 
 }
