@@ -2,36 +2,45 @@ package com.avp.excel.template.engine;
 
 import ca.canon.fast.utils.GeneralUtil;
 
-public class ClassProperty{
-	private String className;
+public class ClassProperty extends Descriptor{
+	private String className; // used as key
 	private String propertyName;
 	private IConvertor convertor;
 	
 	/* 
-	 * TODO - <AP> exctract IConvertor from inputCellDescriptor
 	 * very naive implementation 
-	 * input: 
+	 * input:	${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType},${ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}													
+	 *	or:		${month},${ca.canon.fast.model.impl.MonthToIntegerConvertor}
+	 * propertyName in 1st position might be in full format or just name
 	 * className: ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO
 	 * propertyName:userName
 	 * 
 	 */
-	public ClassProperty(TableDescriptor td, String inputCellDescriptor) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		if(td.getDefaultClassName() != null){
+	public ClassProperty(TableDescriptor td, String cellContent) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+		if(td != null && !GeneralUtil.isEmpty(td.getDefaultClassName())){
 			className = td.getDefaultClassName();
 		}
-		String descriptors[] = inputCellDescriptor.split(",");
-		String fullName = descriptors[0];
-		fullName = fullName.substring(2, fullName.length()-1);
-		int propertyStartIdx = fullName.lastIndexOf(".");
-		className = fullName.substring(0, propertyStartIdx);
-		propertyName = fullName.substring(propertyStartIdx+1);
-		//TODO - <AP> exctract IConvertor from inputCellDescriptor
+		//expected: ${properetyName},${convertor}
+		String descriptors[] = cellContent.split(",");
+		String fullPropertyName = descriptors[0]; // ${properetyName}
+		fullPropertyName = stripDecoration(fullPropertyName);
+
+		int propertyStartIdx = fullPropertyName.lastIndexOf(".");
+		if(propertyStartIdx != NOT_FOUND){
+			className = fullPropertyName.substring(0, propertyStartIdx);
+			propertyName = fullPropertyName.substring(propertyStartIdx+1);
+		}else{
+			propertyName = fullPropertyName;
+		}
+		
+		// process if optional converter provided
 		if(descriptors.length>1 && !GeneralUtil.isEmpty(descriptors[1])){
 			String convertorName = descriptors[1]; 
-			convertorName = convertorName.substring(2, convertorName.length()-1);
+			convertorName = stripDecoration(convertorName);
 			Class<?>  clazz = Class.forName(convertorName);
 			convertor = (IConvertor) clazz.newInstance();
 		}
+		
 	}
 	public String getClassName() {return className;}//public void setClassName(String className) {this.className = className;}
 	public String getPropertyName() {return propertyName;}//public void setPropertyName(String propertyName) {this.propertyName = propertyName;}

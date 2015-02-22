@@ -36,12 +36,22 @@ import ca.canon.fast.utils.GeneralUtil;
  * v 0.0.6  Fix Error: Empty row in collected data from table
  * tag version # 0.1
  * v 0.1.1  Introduce TableDescriptor  
+ * v 0.1.2 - New table meta-data format
+ *	Introduce default className for 'table' tag
+ *	- Should support old fashion 
+ *	- in BNF notation   ".{table:start[';'+'className:ca.canon.fast.model.impl.SalesUploadWeekFct']}"
+ *	- if .{table:start;className:ca.canon.fast.model.impl.SalesUploadWeekFct} contains className property may be in short form ${itemCode}
+ *		otherwise in long ${ca.canon.fast.model.impl.SalesUploadWeekFct.itemCode}
+ *	- Example:
+ *		.{table:start;className:ca.canon.fast.model.impl.SalesUploadWeekFct}
+ *		${itemCode}|${ca.canon.fast.model.impl.SalesUploadWeekFct.billTo}|${sellTo}|${year}|${month},${ca.canon.fast.model.impl.MonthToIntegerConvertor}${dollar1}|${unit1}|${dollar2}|${unit2}|${dollar3}|${unit3}|${dollar4}|${unit4}|${dollar5}|${unit5}
+ *		.{table:end;className:ca.canon.fast.model.impl.SalesUploadWeekFct
  * 
  * 
  * @author ptitchkin
  *
  */
-public class ExcelTemplateHelper {
+public class ExcelTemplateHelper extends Descriptor{
 	private static Logger logger = Logger.getLogger(ExcelTemplateHelper.class);
 
 	private static final String ERROR_IN_PARSING = "Error in Excel parsing";
@@ -87,10 +97,12 @@ public class ExcelTemplateHelper {
 	private String[] excludeArray = null;
 
 	private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
-	
 	private HashMap<String, ClassProperty> commonPropertyMap = new HashMap<String, ClassProperty>();
-	
-	private int rowTableStartIdx = 0;
+
+	/**
+	 * TODO - <AP> must be reviewed prior to multi-table support
+	 */
+	private int rowTableStartIdx = -1;
 	
 	private void resetParser(){
 		commonMap = resetEntityMap(commonMap);
@@ -119,19 +131,18 @@ public class ExcelTemplateHelper {
 	 * @throws Exception
 	 */
 	public ExcelTemplateHelper(File fileToParse) throws Exception{
+		TableDescriptor td = null;
 		try {
 			FileInputStream inputWbStream = new FileInputStream(fileToParse);
 			//Get the workbook instance for XLS file 
 			workbook = new HSSFWorkbook(inputWbStream);
 			metaSheet = workbook.getSheet(SpreadsheetType.MetaData.getTypeCode());//getSheet("SERVICE_SHEET");
-			TableDescriptor td = null;
 
 			if ( metaSheet ==null){
 				throw new Exception("Template workbook must have 'SERVICE_SHEET' sheet with template");
 			}
 			Iterator<Row> rowIterator = metaSheet.rowIterator();
 			int rowIdx = 0;
-			rowTableStartIdx = 0;
 			  
 			while(rowIterator.hasNext()){
 				Row row = rowIterator.next();
@@ -149,23 +160,24 @@ public class ExcelTemplateHelper {
 						cellIdx++;//don't forget to increment so next pass will point next cell
 						continue;
 					}
-					if(content.startsWith(".{")){ // .{table:start} or .{table:end}
-						td = new TableDescriptor(content); 
-						content = content.substring(2, content.length()-1); // remove starting '.{' and trailing '}'
-						String[] cmd = content.split(":");
-						if(cmd[0].equalsIgnoreCase("table") && cmd[1].equalsIgnoreCase("start"))
-							rowTableStartIdx=rowIdx+1;		
+					if(content.startsWith(START_TAG)){ // .{table:start} or .{table:end}
+						TableDescriptor tmpTd = new TableDescriptor(content); 
+						//TODO - <AP> make it conditional if(td != null)
+						if(tmpTd.isValid()){
+							td = tmpTd;
+							rowTableStartIdx=rowIdx+1;
+						}
 					}
 					
-					if(content.startsWith("${")){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
-						//TODO - <AP> pass whole content to ClassProperty(content);
-						//content = content.substring(2, content.length()-1);
+					if(content.startsWith(START_VAR)){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
 						ClassProperty classProperty = new ClassProperty(td, content);
-						if(rowTableStartIdx==0){
-							commonPropertyMap.put(""+rowIdx+"_"+cellIdx, classProperty);
+						String key = new StringBuilder().append(rowIdx).append("_").append(cellIdx).toString(); 
+						if(rowTableStartIdx <= 0){
+							commonPropertyMap.put(key, classProperty);
 						}else{
-							tablePropertyMap.put(""+rowIdx+"_"+cellIdx, classProperty);
+							tablePropertyMap.put(key, classProperty);
 						}
+						
 						if (!resultMap.containsKey(classProperty.getClassName())){
 							resultMap.put(classProperty.getClassName(),new ArrayList<Object>());
 						}
@@ -177,7 +189,6 @@ public class ExcelTemplateHelper {
 				}//eof while(cellIterator.hasNext())
 				rowIdx++; //next pass will point next row
 			}//eof while(rowIterator.hasNext())
-			
 			excludeArray = getExcludeFields(tablePropertyMap);
 			logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
@@ -190,13 +201,11 @@ public class ExcelTemplateHelper {
 	}
 
 	/**
-	 * 
 	 * parse sheets with suffix "_Data" based on template sheet "SERVICE_SHEET" acquired in c-tor
 	 * @throws Exception 
 	 * 
 	 */
 	public Map<String, Map<String, ArrayList<Object>>> parseDataSheets() throws Exception {
-		
 		int numberOfSheets  = workbook.getNumberOfSheets();
 		//List<HSSFSheet> dataSheets = new ArrayList<HSSFSheet>();
 		Map<String, Map<String, ArrayList<Object>>> mapOfSheets = new HashMap<String, Map<String, ArrayList<Object>>>();

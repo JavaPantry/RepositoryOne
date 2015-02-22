@@ -33,24 +33,19 @@ public class ExcelTemplateHelperTest {
 	
 	@Test
 	public void testParseExcelDataExt() throws Exception {
-		File forecastTemplate = new File("ForecastTemplateExt.xls");
-		ExcelTemplateHelper exelTpl = new ExcelTemplateHelper(forecastTemplate);
-		Map<String, Map<String, ArrayList<Object>>> resultMap = exelTpl.parseDataSheets();
-	//TODO - <AP> need to validate data	
-		Set<String> sheetKeySet = resultMap.keySet();
-		for (String sheetKey : sheetKeySet) {
-			logger.debug(sheetKey +" data sheet in workbook");
-			Map<String, ArrayList<Object>> result = resultMap.get(sheetKey);
-			exelTpl.logSheetData(result);
-		}//eofor sheetKeySet
+		processExcelData("ForecastTemplateExt.xls");
 	}
 	
-	//@ Test
+	@Test
 	public void testParseExcelData() throws Exception {
-		File forecastTemplate = new File("ForecastTemplate.xls");
+		processExcelData("ForecastTemplate.xls");
+	}
+
+	private void processExcelData(String strforecastTemplate) throws Exception {
+		File forecastTemplate = new File(strforecastTemplate);
 		ExcelTemplateHelper exelTpl = new ExcelTemplateHelper(forecastTemplate);
 		Map<String, Map<String, ArrayList<Object>>> resultMap = exelTpl.parseDataSheets();
-	//TODO - <AP> need to validate data	
+		//TODO - <AP> need to validate data?	
 		Set<String> sheetKeySet = resultMap.keySet();
 		for (String sheetKey : sheetKeySet) {
 			logger.debug(sheetKey +" data sheet in workbook");
