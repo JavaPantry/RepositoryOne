@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.beanutils.converters.IntegerConverter;
@@ -96,7 +97,7 @@ public class ExcelTemplateHelper extends Descriptor{
 	 */
 	private String[] excludeArray = null;
 
-	private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
+	//private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
 	private HashMap<String, ClassProperty> commonPropertyMap = new HashMap<String, ClassProperty>();
 
 	/**
@@ -131,7 +132,11 @@ public class ExcelTemplateHelper extends Descriptor{
 	 * @throws Exception
 	 */
 	public ExcelTemplateHelper(File fileToParse) throws Exception{
+		int tableIdx = 0;
 		TableDescriptor td = null;
+		//only to control embedded tables (table inside table)
+		Stack<TableDescriptor> tableStack = new Stack<TableDescriptor>();
+		
 		try {
 			FileInputStream inputWbStream = new FileInputStream(fileToParse);
 			//Get the workbook instance for XLS file 
@@ -163,19 +168,26 @@ public class ExcelTemplateHelper extends Descriptor{
 					if(content.startsWith(START_TAG)){ // .{table:start} or .{table:end}
 						TableDescriptor tmpTd = new TableDescriptor(content); 
 						//TODO - <AP> make it conditional if(td != null)
-						if(tmpTd.isValid()){
+						if(tmpTd.isStart()){
 							td = tmpTd;
 							rowTableStartIdx=rowIdx+1;
+							tables.add(td);
+							tableStack.push(td);
+						}
+						if(tmpTd.isEnd()){
+							tableStack.pop();
 						}
 					}
 					
 					if(content.startsWith(START_VAR)){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
 						ClassProperty classProperty = new ClassProperty(td, content);
 						String key = new StringBuilder().append(rowIdx).append("_").append(cellIdx).toString(); 
-						if(rowTableStartIdx <= 0){
+						//if(rowTableStartIdx <= 0){
+						if(tableStack.isEmpty()){ //if not inside table store variable in commonPropertyMap 	
 							commonPropertyMap.put(key, classProperty);
 						}else{
-							tablePropertyMap.put(key, classProperty);
+							TableDescriptor currentTableDescriptor = tableStack.peek(); 
+							currentTableDescriptor.getTablePropertyMap().put(key, classProperty);
 						}
 						
 						if (!resultMap.containsKey(classProperty.getClassName())){
@@ -213,7 +225,7 @@ public class ExcelTemplateHelper extends Descriptor{
 			String sheetName = workbook.getSheetName(sheetIdx);
 			if(sheetName.endsWith(DATASHEET_SUFFIX)){
 				//TODO - <AP> - resetParser destroy data collected on previous pass. WTF?!!!  
-				resetParser();
+				//resetParser();
 				Map<String, ArrayList<Object>> objectsFromDataSheet = parseDataSheet(workbook.getSheetAt(sheetIdx));
 				String dataName = sheetName.substring(0,sheetName.indexOf(DATASHEET_SUFFIX));
 				mapOfSheets.put(dataName, objectsFromDataSheet);
@@ -234,6 +246,7 @@ public class ExcelTemplateHelper extends Descriptor{
 	 */
 	@SuppressWarnings({ "unused", "unchecked" })
 	private Map<String,ArrayList<Object>> parseDataSheet(HSSFSheet dataSheet) throws Exception {
+		resetParser();
 		Object tmpDummyCommonEntity = null;
 		try{
 			//this.logSheetData(resultMap);
