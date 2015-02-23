@@ -30,7 +30,12 @@ public class ExcelTemplateHelperTest {
 	public void tearDown() throws Exception {
 	}
 	
-	
+
+	@Test
+	public void testParseExcelDataMultiTab() throws Exception {
+		processExcelData("ForecastTemplateMultiTab.xls");
+	}
+/*
 	@Test
 	public void testParseExcelDataExt() throws Exception {
 		processExcelData("ForecastTemplateExt.xls");
@@ -40,7 +45,7 @@ public class ExcelTemplateHelperTest {
 	public void testParseExcelData() throws Exception {
 		processExcelData("ForecastTemplate.xls");
 	}
-
+*/
 	private void processExcelData(String strforecastTemplate) throws Exception {
 		File forecastTemplate = new File(strforecastTemplate);
 		ExcelTemplateHelper exelTpl = new ExcelTemplateHelper(forecastTemplate);
