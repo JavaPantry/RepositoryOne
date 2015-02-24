@@ -86,18 +86,18 @@ public class ExcelTemplateHelper extends Descriptor{
 	public void setTables(List<TableDescriptor> tables) {this.tables = tables;}  
 
 	/**
-	 * 	resultMap and commonMap are used to store parsing result done in c-tor ExcelTemplateHelper(File fileToParse) 
+	 * 	resultMap and commonBeanAsMap are used to store parsing result done in c-tor ExcelTemplateHelper(File fileToParse) 
 	 *	shared between spreadsheet processing
 	 */
-	private Map<String,ArrayList<Object>> resultMap = new HashMap<String, ArrayList<Object>>();
-	private Map<String,ArrayList<Object>> commonMap = new HashMap<String, ArrayList<Object>>();
+	private Map<String,ArrayList<Object>> collectedBeansFromTablesAsMap = new HashMap<String, ArrayList<Object>>();
+	private Map<String,ArrayList<Object>> commonBeansAsMap = new HashMap<String, ArrayList<Object>>();
 
 	/**
 	 * 	store properties which will not copied from header bean to table enteties
 	 */
 	private String[] excludeArray = null;
 
-	//private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
+	//moved to TableDescriptor: private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
 	private HashMap<String, ClassProperty> commonPropertyMap = new HashMap<String, ClassProperty>();
 
 	/**
@@ -105,19 +105,7 @@ public class ExcelTemplateHelper extends Descriptor{
 	 */
 	private int rowTableStartIdx = -1;
 	
-	private void resetParser(){
-		commonMap = resetEntityMap(commonMap);
-		resultMap = resetEntityMap(resultMap);
-	}
 	
-	private Map<String, ArrayList<Object>> resetEntityMap(Map<String, ArrayList<Object>> mapToReset) {
-		Map<String,ArrayList<Object>> newMap = new HashMap<String, ArrayList<Object>>();
-		Set<String> keySet = mapToReset.keySet();
-		for (String key : keySet) {
-			newMap.put(key, new ArrayList<Object>());
-		}
-		return newMap;
-	}
 	/**
 	 * constructor parse template sheet "SERVICE_SHEET"
 	 * current implementation support only one table per workbook
@@ -138,71 +126,73 @@ public class ExcelTemplateHelper extends Descriptor{
 		Stack<TableDescriptor> tableStack = new Stack<TableDescriptor>();
 		
 		try {
-			FileInputStream inputWbStream = new FileInputStream(fileToParse);
-			//Get the workbook instance for XLS file 
-			workbook = new HSSFWorkbook(inputWbStream);
-			metaSheet = workbook.getSheet(SpreadsheetType.MetaData.getTypeCode());//getSheet("SERVICE_SHEET");
-
-			if ( metaSheet ==null){
-				throw new Exception("Template workbook must have 'SERVICE_SHEET' sheet with template");
-			}
-			Iterator<Row> rowIterator = metaSheet.rowIterator();
-			int rowIdx = 0;
-			  
-			while(rowIterator.hasNext()){
-				Row row = rowIterator.next();
-				Iterator<Cell> cellIterator = row.cellIterator();
-				int cellIdx = 0;
-				while(cellIterator.hasNext()){
-					Cell cell = cellIterator.next();
-					
-					String content = "";
-					if(cell.getCellType() == HSSFCell.CELL_TYPE_STRING){
-	                	content = cell.getStringCellValue();
-					}
-					
-					if(GeneralUtil.isEmpty(content)){
-						cellIdx++;//don't forget to increment so next pass will point next cell
-						continue;
-					}
-					if(content.startsWith(START_TAG)){ // .{table:start} or .{table:end}
-						TableDescriptor tmpTd = new TableDescriptor(content); 
-						//TODO - <AP> make it conditional if(td != null)
-						if(tmpTd.isStart()){
-							td = tmpTd;
-							rowTableStartIdx=rowIdx+1;
-							tables.add(td);
-							tableStack.push(td);
-						}
-						if(tmpTd.isEnd()){
-							tableStack.pop();
-						}
-					}
-					
-					if(content.startsWith(START_VAR)){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
-						ClassProperty classProperty = new ClassProperty(td, content);
-						String key = new StringBuilder().append(rowIdx).append("_").append(cellIdx).toString(); 
-						//if(rowTableStartIdx <= 0){
-						if(tableStack.isEmpty()){ //if not inside table store variable in commonPropertyMap 	
-							commonPropertyMap.put(key, classProperty);
-						}else{
-							TableDescriptor currentTableDescriptor = tableStack.peek(); 
-							currentTableDescriptor.getTablePropertyMap().put(key, classProperty);
+				FileInputStream inputWbStream = new FileInputStream(fileToParse);
+				//Get the workbook instance for XLS file 
+				workbook = new HSSFWorkbook(inputWbStream);
+				metaSheet = workbook.getSheet(SpreadsheetType.MetaData.getTypeCode());//getSheet("SERVICE_SHEET");
+	
+				if ( metaSheet ==null){
+					throw new Exception("Template workbook must have 'SERVICE_SHEET' sheet with template");
+				}
+				Iterator<Row> rowIterator = metaSheet.rowIterator();
+				int rowIdx = 0;
+				  
+				while(rowIterator.hasNext()){
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					int cellIdx = 0;
+					while(cellIterator.hasNext()){
+						Cell cell = cellIterator.next();
+						
+						String content = "";
+						if(cell.getCellType() == HSSFCell.CELL_TYPE_STRING){
+		                	content = cell.getStringCellValue();
 						}
 						
-						if (!resultMap.containsKey(classProperty.getClassName())){
-							resultMap.put(classProperty.getClassName(),new ArrayList<Object>());
+						if(GeneralUtil.isEmpty(content)){
+							cellIdx++;//don't forget to increment so next pass will point next cell
+							continue;
 						}
-						if (!commonMap.containsKey(classProperty.getClassName())){
-							commonMap.put(classProperty.getClassName(),new ArrayList<Object>());
+						if(content.startsWith(START_TAG)){ // .{table:start} or .{table:end}
+							TableDescriptor tmpTd = new TableDescriptor(content); 
+							if(tmpTd.isStart()){
+								td = tmpTd;
+								rowTableStartIdx=rowIdx+1;
+								tables.add(td);
+								tableStack.push(td);
+							}
+							if(tmpTd.isEnd()){
+								tableStack.pop();
+							}
 						}
-					}
-					cellIdx++; //next pass will point next cell
-				}//eof while(cellIterator.hasNext())
-				rowIdx++; //next pass will point next row
-			}//eof while(rowIterator.hasNext())
-			excludeArray = getExcludeFields(tablePropertyMap);
-			logger.debug("End of template sheet in workbook");
+						
+						if(content.startsWith(START_VAR)){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
+							ClassProperty classProperty = new ClassProperty(td, content);
+							String key = new StringBuilder().append(rowIdx).append("_").append(cellIdx).toString(); 
+							//if(rowTableStartIdx <= 0){
+							if(tableStack.isEmpty()){ //if not inside table store variable in commonPropertyMap 	
+								commonPropertyMap.put(key, classProperty);
+							}else{
+								TableDescriptor currentTableDescriptor = tableStack.peek(); 
+								currentTableDescriptor.getTablePropertyMap().put(key, classProperty);
+							}
+							
+							if (!collectedBeansFromTablesAsMap.containsKey(classProperty.getClassName())){
+								collectedBeansFromTablesAsMap.put(classProperty.getClassName(),new ArrayList<Object>());
+							}
+							if (!commonBeansAsMap.containsKey(classProperty.getClassName())){
+								commonBeansAsMap.put(classProperty.getClassName(),new ArrayList<Object>());
+							}
+						}
+						cellIdx++; //next pass will point next cell
+					}//eof while(cellIterator.hasNext())
+					rowIdx++; //next pass will point next row
+				}//eof while(rowIterator.hasNext())
+				
+				//TODO - <AP> collect excludeArray[][] for each TableDescriptor 
+				excludeArray = getExcludeFields(tablePropertyMap);
+				
+				logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
 				logger.error(e,e);
 				throw new Exception(ERROR_IN_PARSING,e);
@@ -224,8 +214,6 @@ public class ExcelTemplateHelper extends Descriptor{
 		for (int sheetIdx = 0; sheetIdx < numberOfSheets; sheetIdx++) {
 			String sheetName = workbook.getSheetName(sheetIdx);
 			if(sheetName.endsWith(DATASHEET_SUFFIX)){
-				//TODO - <AP> - resetParser destroy data collected on previous pass. WTF?!!!  
-				//resetParser();
 				Map<String, ArrayList<Object>> objectsFromDataSheet = parseDataSheet(workbook.getSheetAt(sheetIdx));
 				String dataName = sheetName.substring(0,sheetName.indexOf(DATASHEET_SUFFIX));
 				mapOfSheets.put(dataName, objectsFromDataSheet);
@@ -246,22 +234,28 @@ public class ExcelTemplateHelper extends Descriptor{
 	 */
 	@SuppressWarnings({ "unused", "unchecked" })
 	private Map<String,ArrayList<Object>> parseDataSheet(HSSFSheet dataSheet) throws Exception {
-		resetParser();
+		commonBeansAsMap = resetEntityMap(commonBeansAsMap);
+		collectedBeansFromTablesAsMap = resetEntityMap(collectedBeansFromTablesAsMap);
 		Object tmpDummyCommonEntity = null;
+
 		try{
 			//this.logSheetData(resultMap);
 			Iterator<Row> rowIterator = dataSheet.rowIterator();
 			int rowIdx = 0;
 			while(rowIterator.hasNext()){
 				Row row = rowIterator.next();
+				
 				if(rowIdx < rowTableStartIdx){
-					//collect common fields before table body  TODO - <AP> because of assignment any empty row before table body will reset commonEntity
-					tmpDummyCommonEntity = pushRowToEntity(commonPropertyMap, commonMap, tmpDummyCommonEntity, rowIdx, row);
+					//collect common fields before table body  
+					//assignment any empty row before table body will reset commonEntity 
+					//BUT values still accumulate in ?commonBeanAsMap? 
+					tmpDummyCommonEntity = pushRowToEntity(commonPropertyMap, commonBeansAsMap, tmpDummyCommonEntity, rowIdx, row);
 					rowIdx++;
 					continue;
 				}
-				//collect entities from table body
-				Object entity = pushRowToEntity(tablePropertyMap, resultMap, null, rowTableStartIdx, row);
+				
+				//collect entities from current table body
+				Object entity = pushRowToEntity(tablePropertyMap, collectedBeansFromTablesAsMap, null, rowTableStartIdx, row);
 				if(entity == null)//TODO - <AP> any other valid way to detect end of data?
 					break;
 				populateCommonFields(entity);//(commonEntity, entity);
@@ -285,7 +279,7 @@ public class ExcelTemplateHelper extends Descriptor{
 			throw new Exception(ERROR_IN_PARSING,e);
 		}
 		//this.logSheetData(resultMap);
-		return resultMap;
+		return collectedBeansFromTablesAsMap;
 	}//eof parseDataSheet(...
 
 	/**
@@ -326,10 +320,10 @@ public class ExcelTemplateHelper extends Descriptor{
 	
 	private void populateCommonFields(Object entity) { 
 		//find same class in commonMap
-		Set<String> keys = commonMap.keySet();
+		Set<String> keys = commonBeansAsMap.keySet();
 		for (String key : keys) {
 			if(entity.getClass().getName().equals(key)){
-				ArrayList<Object> srcList = commonMap.get(key);
+				ArrayList<Object> srcList = commonBeansAsMap.get(key);
 				Object src = srcList.get(0);
 				BeanUtility.nullSafeMergeTo(src, entity, excludeArray);
 			}
@@ -340,7 +334,7 @@ public class ExcelTemplateHelper extends Descriptor{
 	 * create instance of object (if not passed in) and populate properties from cells (described in template) 
 	 * return null if row is empty (null might trigger end of table)
 	 * @param propertyMap
-	 * @param collectedMap
+	 * @param collectedBeansMap - either commonBeanAsMap or resultMap
 	 * @param entity
 	 * @param rowIdx
 	 * @param row
@@ -351,13 +345,12 @@ public class ExcelTemplateHelper extends Descriptor{
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-	private Object pushRowToEntity(HashMap<String, ClassProperty> propertyMap, 
-											Map<String,ArrayList<Object>> collectedMap, 
-											Object entity, 
-											int rowIdx,  
-											Row row) throws ClassNotFoundException, InstantiationException, 
-																IllegalAccessException, InvocationTargetException, 
-																NoSuchMethodException{
+	private Object pushRowToEntity(	Map<String, ClassProperty> propertyMap, 
+									Map<String,ArrayList<Object>> collectedBeansMap, 
+									Object entity, 
+									int rowIdx,  
+									Row row)
+			throws ClassNotFoundException, InstantiationException,IllegalAccessException, InvocationTargetException, NoSuchMethodException{
 		boolean isRowEmpty = true;
 		int cellIdx = 0;
 		
@@ -380,7 +373,7 @@ public class ExcelTemplateHelper extends Descriptor{
 				pushCellToEntity(entity, cell, classProperty);
 				
 				//TODO - <AP> what if collectedMap does NOT contain class name? It's not possible because 1-st pass should collect all classes
-				ArrayList<Object> entities = collectedMap.get(classProperty.getClassName());
+				ArrayList<Object> entities = collectedBeansMap.get(classProperty.getClassName());
 				if(!entities.contains(entity)){
 				entities.add(entity);
 				}// if cell not empty
@@ -463,4 +456,13 @@ public class ExcelTemplateHelper extends Descriptor{
 		}
 		PropertyUtils.setProperty(entity, propertyName, dstValue);
 	}
+	private Map<String, ArrayList<Object>> resetEntityMap(Map<String, ArrayList<Object>> mapToReset) {
+		Map<String,ArrayList<Object>> newMap = new HashMap<String, ArrayList<Object>>();
+		Set<String> keySet = mapToReset.keySet();
+		for (String key : keySet) {
+			newMap.put(key, new ArrayList<Object>());
+		}
+		return newMap;
+	}
+
 }
