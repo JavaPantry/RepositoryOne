@@ -92,20 +92,12 @@ public class ExcelTemplateHelper extends Descriptor{
 	private Map<String,ArrayList<Object>> collectedBeansFromTablesAsMap = new HashMap<String, ArrayList<Object>>();
 	private Map<String,ArrayList<Object>> commonBeansAsMap = new HashMap<String, ArrayList<Object>>();
 
-	/**
-	 * 	store properties which will not copied from header bean to table enteties
-	 */
-	private String[] excludeArray = null;
-
 	//moved to TableDescriptor: private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
+	/**
+	 * commonPropertyMap collect meta-data from SERVICE_SHEET related to shared/header bean
+	 */
 	private HashMap<String, ClassProperty> commonPropertyMap = new HashMap<String, ClassProperty>();
 
-	/**
-	 * TODO - <AP> must be reviewed prior to multi-table support
-	 * private int rowTableStartIdx = -1;
-	 */
-	
-	
 	/**
 	 * constructor parse template sheet "SERVICE_SHEET"
 	 * current implementation support only one table per workbook
@@ -157,7 +149,7 @@ public class ExcelTemplateHelper extends Descriptor{
 							TableDescriptor tmpTd = new TableDescriptor(content); 
 							if(tmpTd.isStart()){
 								td = tmpTd;
-								td.setRowIndex(rowIdx+1);//rowTableStartIdx=rowIdx+1;
+								td.setRowIndex(rowIdx+1);
 								tables.add(td);
 								tableStack.push(td);
 							}
@@ -169,7 +161,6 @@ public class ExcelTemplateHelper extends Descriptor{
 						if(content.startsWith(START_VAR)){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
 							ClassProperty classProperty = new ClassProperty(td, content);
 							String key = new StringBuilder().append(rowIdx).append("_").append(cellIdx).toString(); 
-							//if(rowTableStartIdx <= 0){
 							if(tableStack.isEmpty()){ //if not inside table store variable in commonPropertyMap 	
 								commonPropertyMap.put(key, classProperty);
 							}else{
@@ -188,7 +179,8 @@ public class ExcelTemplateHelper extends Descriptor{
 					}//eof while(cellIterator.hasNext())
 					rowIdx++; //next pass will point next row
 				}//eof while(rowIterator.hasNext())
-				//TODO - <AP> collect excludeArray[][] for each TableDescriptor in
+
+				//collect excludeArray[][] for each TableDescriptor in
 				for (TableDescriptor tableDescriptor : tables) {
 					tableDescriptor.updateExcludeFields();
 				} 
@@ -253,14 +245,14 @@ public class ExcelTemplateHelper extends Descriptor{
 					rowIdx++;
 					continue;
 				}
+
 				if(isRowTableEnd(row)){
 					insideTable = false;
 					rowIdx++;
 					continue;
 				}
-				
-				//TODO - <AP> if row outside table tags .{table:start}
-				//if(rowIdx < rowTableStartIdx){
+
+				//if row outside table tags .{table:start}
 				if(!insideTable){
 					//Collect common fields before table body  
 					//assignment any empty row before table body will reset commonEntity 
@@ -269,7 +261,7 @@ public class ExcelTemplateHelper extends Descriptor{
 					rowIdx++;
 					continue;
 				}
-				//here we are only when inside table
+				//we can get here only when inside table (within .{table:start} and .{table:end} tags)
 				//Collect entities from current table body marked with table tag .{table:ends} 
 				Object entity = pushRowToEntity(tables.get(currentTableIdx).getTablePropertyMap(), collectedBeansFromTablesAsMap, null, tables.get(currentTableIdx).getRowIndex(), row);
 				if(entity == null)//TODO - <AP> any other valid way to detect end of data?

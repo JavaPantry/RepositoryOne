@@ -10,6 +10,8 @@ public class ActualsDTO{
 	private int 	month;
 	
 	private String  actualType;
+	private int 	value;
+	
 	public ActualsDTO(){}
 
 	public String getUserName() {return userName;}
@@ -27,6 +29,8 @@ public class ActualsDTO{
 	public void setBillTo(String billTo) {this.billTo = billTo;}
 	public String getSellTo() {return sellTo;}
 	public void setSellTo(String sellTo) {this.sellTo = sellTo;}
+	public int getValue() {return value;}
+	public void setValue(int value) {this.value = value;}
 
 	@Override
 	public String toString() {
@@ -36,9 +40,12 @@ public class ActualsDTO{
 				.append(", billTo=").append(billTo)
 				.append(", sellTo=").append(sellTo)
 				.append(", year=").append(year)
-				.append(", month=").append(month).append(", actualType=").append(actualType).append("]");
+				.append(", month=").append(month).append(", actualType=").append(actualType)
+				.append(", value=").append(value)
+				.append("]");
 		return builder.toString();
 	}
+
 
 
 }

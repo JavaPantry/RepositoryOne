@@ -23,12 +23,17 @@ public class TableDescriptor extends Descriptor{
 
 	private static Logger logger = Logger.getLogger(TableDescriptor.class);
 	
+	//TODO - <AP> do we really need it or it is same as rowIndex? 
 	private int		index = 0; //current index in SERVICE_SHEET
 	
 	private boolean start = false;
 	private boolean end = false;
 	private String	defaultClassName = null;
-	private HashMap<String, ClassProperty>	tablePropertyMap = new HashMap<String, ClassProperty>();	
+	private HashMap<String, ClassProperty>	tablePropertyMap = new HashMap<String, ClassProperty>();
+
+	/**
+	 * 	store properties which will not copied from header bean to table enteties
+	 */
 	private String[]						arrayOfExcludedProperties = null;
 
 	private int rowIndex;
