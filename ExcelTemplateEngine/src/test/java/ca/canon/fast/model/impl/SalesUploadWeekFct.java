@@ -129,6 +129,7 @@ public class SalesUploadWeekFct extends BaseAuditEntity{
 				.append(dollar4).append(", unit4=").append(unit4)
 				.append(", dollar5=").append(dollar5).append(", unit5=")
 				.append(unit5).append(", actualType=").append(actualType)
+				.append(", createBy=").append(createBy)
 				.append("]");
 		return builder.toString();
 	}

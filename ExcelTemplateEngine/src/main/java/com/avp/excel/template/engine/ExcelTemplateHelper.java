@@ -250,10 +250,12 @@ public class ExcelTemplateHelper extends Descriptor{
 				if(isRowTableStart(row)){
 					insideTable = true;
 					currentTableIdx++;
+					rowIdx++;
 					continue;
 				}
 				if(isRowTableEnd(row)){
 					insideTable = false;
+					rowIdx++;
 					continue;
 				}
 				
@@ -264,7 +266,7 @@ public class ExcelTemplateHelper extends Descriptor{
 					//assignment any empty row before table body will reset commonEntity 
 					//BUT values still accumulate in ?commonBeanAsMap? 
 					tmpDummyCommonEntity = pushRowToEntity(commonPropertyMap, commonBeansAsMap, tmpDummyCommonEntity, rowIdx, row);
-					//rowIdx++;
+					rowIdx++;
 					continue;
 				}
 				//here we are only when inside table
@@ -272,8 +274,8 @@ public class ExcelTemplateHelper extends Descriptor{
 				Object entity = pushRowToEntity(tables.get(currentTableIdx).getTablePropertyMap(), collectedBeansFromTablesAsMap, null, tables.get(currentTableIdx).getRowIndex(), row);
 				if(entity == null)//TODO - <AP> any other valid way to detect end of data?
 					break;
-				populateCommonFields(entity);//(commonEntity, entity);
-				//rowIdx++;
+				populateCommonFields(entity, tables.get(currentTableIdx).getArrayOfExcludedProperties());//(commonEntity, entity);
+				rowIdx++;
 			}
 			logger.debug("End of data sheet in workbook");
 		} catch (IllegalAccessException e) {
@@ -295,6 +297,7 @@ public class ExcelTemplateHelper extends Descriptor{
 		//this.logSheetData(resultMap);
 		return collectedBeansFromTablesAsMap;
 	}//eof parseDataSheet(...
+
 
 	private boolean isRowTableStart(Row row){
 		TableDescriptor td = getTableDescriptorFromRow(row);
@@ -338,7 +341,8 @@ public class ExcelTemplateHelper extends Descriptor{
 		}//eofor keySet
 	}//eof logSheetData(...
 	
-	private void populateCommonFields(Object entity) { 
+	
+	private void populateCommonFields(Object entity,String[] arrayOfExcludedProperties) { 
 		//find same class in commonMap
 		Set<String> keys = commonBeansAsMap.keySet();
 		for (String key : keys) {
@@ -346,11 +350,10 @@ public class ExcelTemplateHelper extends Descriptor{
 				ArrayList<Object> srcList = commonBeansAsMap.get(key);
 				if(!GeneralUtil.isEmpty(srcList)){
 					Object src = srcList.get(0);
-					BeanUtility.nullSafeMergeTo(src, entity, excludeArray);
+					BeanUtility.nullSafeMergeTo(src, entity, arrayOfExcludedProperties);
 				}
 			}
 		}
-		
 	}
 	/**
 	 * create instance of object (if not passed in) and populate properties from cells (described in template) 

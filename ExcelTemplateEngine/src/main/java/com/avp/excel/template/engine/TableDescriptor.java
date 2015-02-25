@@ -91,4 +91,7 @@ public class TableDescriptor extends Descriptor{
 
 	public void setRowIndex(int rowIndex) {this.rowIndex = rowIndex;}
 	public int getRowIndex() {return rowIndex;}
+
+	public String[] getArrayOfExcludedProperties() {return arrayOfExcludedProperties;}
+	public void setArrayOfExcludedProperties(String[] arrayOfExcludedProperties) {this.arrayOfExcludedProperties = arrayOfExcludedProperties;}
 }

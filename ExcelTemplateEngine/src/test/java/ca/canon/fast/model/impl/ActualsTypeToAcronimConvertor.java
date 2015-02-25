@@ -24,7 +24,7 @@ public interface IActualType {
  * 
  */
 public class ActualsTypeToAcronimConvertor implements IConvertor {
-	private String[] types = {"SELL TROUGH","FORECAST SELL TROUGH","ON HANDS","PURCHASED","FORECAST"}; 
+	private String[] types = {"SELL THROUGH","FORECAST SELL TROUGH","ON HANDS","PURCHASED","FORECAST"}; 
 	private String[] acronims = {"T","FT","H","P","R"};
 	public Object convert(Object input) {
 		String monthName = ((String)input).toUpperCase();
