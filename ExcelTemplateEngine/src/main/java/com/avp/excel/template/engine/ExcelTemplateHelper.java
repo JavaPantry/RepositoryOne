@@ -188,10 +188,10 @@ public class ExcelTemplateHelper extends Descriptor{
 					}//eof while(cellIterator.hasNext())
 					rowIdx++; //next pass will point next row
 				}//eof while(rowIterator.hasNext())
-				
-				//TODO - <AP> collect excludeArray[][] for each TableDescriptor 
-				excludeArray = getExcludeFields(tablePropertyMap);
-				
+				//TODO - <AP> collect excludeArray[][] for each TableDescriptor in
+				for (TableDescriptor tableDescriptor : tables) {
+					tableDescriptor.updateExcludeFields();
+				} 
 				logger.debug("End of template sheet in workbook");
 			} catch (FileNotFoundException e) {
 				logger.error(e,e);
@@ -242,20 +242,33 @@ public class ExcelTemplateHelper extends Descriptor{
 			//this.logSheetData(resultMap);
 			Iterator<Row> rowIterator = dataSheet.rowIterator();
 			int rowIdx = 0;
+			int currentTableIdx = -1;
+			boolean insideTable = false;
 			while(rowIterator.hasNext()){
 				Row row = rowIterator.next();
+				//TODO - <AP> detect .{table:start} or .{table:end}
+				if(isRowTableStart(row)){
+					insideTable = true;
+					currentTableIdx++;
+					continue;
+				}
+				if(isRowTableEnd(row)){
+					insideTable = false;
+					continue;
+				}
 				
-				if(rowIdx < rowTableStartIdx){
-					//collect common fields before table body  
+				//TODO - <AP> if row outside table tags .{table:start}
+				//if(rowIdx < rowTableStartIdx){
+				if(!insideTable){
+					//Collect common fields before table body  
 					//assignment any empty row before table body will reset commonEntity 
 					//BUT values still accumulate in ?commonBeanAsMap? 
 					tmpDummyCommonEntity = pushRowToEntity(commonPropertyMap, commonBeansAsMap, tmpDummyCommonEntity, rowIdx, row);
 					rowIdx++;
 					continue;
 				}
-				
-				//collect entities from current table body
-				Object entity = pushRowToEntity(tablePropertyMap, collectedBeansFromTablesAsMap, null, rowTableStartIdx, row);
+				//Collect entities from current table body marked with table tag .{table:ends} 
+				Object entity = pushRowToEntity(tables.get(rowIdx).getTablePropertyMap(), collectedBeansFromTablesAsMap, null, rowTableStartIdx, row);
 				if(entity == null)//TODO - <AP> any other valid way to detect end of data?
 					break;
 				populateCommonFields(entity);//(commonEntity, entity);
@@ -282,6 +295,34 @@ public class ExcelTemplateHelper extends Descriptor{
 		return collectedBeansFromTablesAsMap;
 	}//eof parseDataSheet(...
 
+	private boolean isRowTableStart(Row row){
+		TableDescriptor td = getTableDescriptorFromRow(row);
+		if(td!= null && td.isStart())
+			return true;
+		return false;
+	}
+	private boolean isRowTableEnd(Row row){
+		TableDescriptor td = getTableDescriptorFromRow(row);
+		if(td!= null && td.isEnd())
+			return true;
+		return false;
+	}
+	private TableDescriptor getTableDescriptorFromRow(Row row){
+		Iterator<Cell> cellIterator = row.cellIterator();
+		while(cellIterator.hasNext()){
+			Cell cell = cellIterator.next();
+			
+			String content = cell.getStringCellValue();
+			if(content.startsWith(START_TAG)){ // .{table:start} or .{table:end}
+				TableDescriptor td = new TableDescriptor(content);
+				if (td.isStart() || td.isEnd())
+					return td;
+			}// if cell not empty
+		}
+		return null;
+	}
+	
+	
 	/**
 	 * Log data from parsed sheet 
 	 * @param objectsFromDataSheet - map of collections for each recognized type
@@ -295,28 +336,6 @@ public class ExcelTemplateHelper extends Descriptor{
 			}
 		}//eofor keySet
 	}//eof logSheetData(...
-	
-	private String[] getExcludeFields(HashMap<String, ClassProperty> tablePropertyMap){
-		//common fields are taken from header of the sheet (they exists only in header and are not exists in table)
-		//collect exclude fields (fields in tablePropertyMap are excluded from when populate entity from commonEntity)
-		List<String> exludeFields = new ArrayList<String>();
-		Set<String> propertyKeys = tablePropertyMap.keySet();
-		boolean first = true;
-		for (String key : propertyKeys) { 
-			ClassProperty classProperty = tablePropertyMap.get(key);
-			String propertyName = classProperty.getPropertyName();
-			if(first){
-				propertyName = "+"+propertyName;
-				first = false;
-			}
-			exludeFields.add(propertyName);
-		}
-		String[] excludeArray = new String[exludeFields.size()];
-		for (int i = 0; i < excludeArray.length; i++) {
-			excludeArray[i] = exludeFields.get(i);					
-		}
-		return excludeArray;
-	}
 	
 	private void populateCommonFields(Object entity) { 
 		//find same class in commonMap

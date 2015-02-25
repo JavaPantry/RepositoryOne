@@ -3,6 +3,7 @@ package com.avp.excel.template.engine;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -27,8 +28,33 @@ public class TableDescriptor extends Descriptor{
 	private boolean start = false;
 	private boolean end = false;
 	private String	defaultClassName = null;
-	private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();	
+	private HashMap<String, ClassProperty>	tablePropertyMap = new HashMap<String, ClassProperty>();	
+	private String[]						arrayOfExcludedProperties = null;
+	
+	
+	public void updateExcludeFields(){
+		//common fields are taken from header of the sheet (they exists only in header and are not exists in table)
+		//collect exclude fields (fields in tablePropertyMap are excluded from when populate entity from commonEntity)
+		List<String> exludeFields = new ArrayList<String>();
+		Set<String> propertyKeys = tablePropertyMap.keySet();
+		boolean first = true;
+		for (String key : propertyKeys) { 
+			ClassProperty classProperty = tablePropertyMap.get(key);
+			String propertyName = classProperty.getPropertyName();
+			if(first){
+				propertyName = "+"+propertyName;
+				first = false;
+			}
+			exludeFields.add(propertyName);
+		}
+		
+		arrayOfExcludedProperties = new String[exludeFields.size()];
+		for (int i = 0; i < arrayOfExcludedProperties.length; i++) {
+			arrayOfExcludedProperties[i] = exludeFields.get(i);					
+		}
+	}
 
+	
 	public TableDescriptor(String content) {
 		content = super.stripDecoration(content);
 		String[] tokenStream = content.split(TOKEN_DELIMITER);
@@ -39,7 +65,7 @@ public class TableDescriptor extends Descriptor{
 			end = true;
 			return;
 		}
-		if(tokens[0].equalsIgnoreCase(TABLE) && tokens[1].equalsIgnoreCase(END)){
+		if(tokens[0].equalsIgnoreCase(TABLE) && tokens[1].equalsIgnoreCase(START)){
 			start = true;
 			if(tokenStream.length > 1){
 				String[] className = tokenStream[1].split(TAG_VALUE_DELIMITER);
