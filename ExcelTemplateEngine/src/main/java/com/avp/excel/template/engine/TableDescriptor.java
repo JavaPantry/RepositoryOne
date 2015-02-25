@@ -30,6 +30,8 @@ public class TableDescriptor extends Descriptor{
 	private String	defaultClassName = null;
 	private HashMap<String, ClassProperty>	tablePropertyMap = new HashMap<String, ClassProperty>();	
 	private String[]						arrayOfExcludedProperties = null;
+
+	private int rowIndex;
 	
 	
 	public void updateExcludeFields(){
@@ -86,4 +88,7 @@ public class TableDescriptor extends Descriptor{
 
 	public HashMap<String, ClassProperty> getTablePropertyMap() {return tablePropertyMap;}
 	public void setTablePropertyMap(HashMap<String, ClassProperty> tablePropertyMap) {this.tablePropertyMap = tablePropertyMap;}
+
+	public void setRowIndex(int rowIndex) {this.rowIndex = rowIndex;}
+	public int getRowIndex() {return rowIndex;}
 }

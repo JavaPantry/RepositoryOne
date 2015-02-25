@@ -102,8 +102,8 @@ public class ExcelTemplateHelper extends Descriptor{
 
 	/**
 	 * TODO - <AP> must be reviewed prior to multi-table support
+	 * private int rowTableStartIdx = -1;
 	 */
-	private int rowTableStartIdx = -1;
 	
 	
 	/**
@@ -157,7 +157,7 @@ public class ExcelTemplateHelper extends Descriptor{
 							TableDescriptor tmpTd = new TableDescriptor(content); 
 							if(tmpTd.isStart()){
 								td = tmpTd;
-								rowTableStartIdx=rowIdx+1;
+								td.setRowIndex(rowIdx+1);//rowTableStartIdx=rowIdx+1;
 								tables.add(td);
 								tableStack.push(td);
 							}
@@ -264,15 +264,16 @@ public class ExcelTemplateHelper extends Descriptor{
 					//assignment any empty row before table body will reset commonEntity 
 					//BUT values still accumulate in ?commonBeanAsMap? 
 					tmpDummyCommonEntity = pushRowToEntity(commonPropertyMap, commonBeansAsMap, tmpDummyCommonEntity, rowIdx, row);
-					rowIdx++;
+					//rowIdx++;
 					continue;
 				}
+				//here we are only when inside table
 				//Collect entities from current table body marked with table tag .{table:ends} 
-				Object entity = pushRowToEntity(tables.get(rowIdx).getTablePropertyMap(), collectedBeansFromTablesAsMap, null, rowTableStartIdx, row);
+				Object entity = pushRowToEntity(tables.get(currentTableIdx).getTablePropertyMap(), collectedBeansFromTablesAsMap, null, tables.get(currentTableIdx).getRowIndex(), row);
 				if(entity == null)//TODO - <AP> any other valid way to detect end of data?
 					break;
 				populateCommonFields(entity);//(commonEntity, entity);
-				rowIdx++;
+				//rowIdx++;
 			}
 			logger.debug("End of data sheet in workbook");
 		} catch (IllegalAccessException e) {
@@ -312,7 +313,7 @@ public class ExcelTemplateHelper extends Descriptor{
 		while(cellIterator.hasNext()){
 			Cell cell = cellIterator.next();
 			
-			String content = cell.getStringCellValue();
+			String content = cell.toString();//getStringCellValue();
 			if(content.startsWith(START_TAG)){ // .{table:start} or .{table:end}
 				TableDescriptor td = new TableDescriptor(content);
 				if (td.isStart() || td.isEnd())
@@ -343,8 +344,10 @@ public class ExcelTemplateHelper extends Descriptor{
 		for (String key : keys) {
 			if(entity.getClass().getName().equals(key)){
 				ArrayList<Object> srcList = commonBeansAsMap.get(key);
-				Object src = srcList.get(0);
-				BeanUtility.nullSafeMergeTo(src, entity, excludeArray);
+				if(!GeneralUtil.isEmpty(srcList)){
+					Object src = srcList.get(0);
+					BeanUtility.nullSafeMergeTo(src, entity, excludeArray);
+				}
 			}
 		}
 		
