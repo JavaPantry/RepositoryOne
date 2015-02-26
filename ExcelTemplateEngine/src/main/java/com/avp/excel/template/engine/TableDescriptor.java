@@ -15,7 +15,28 @@ import org.apache.log4j.Logger;
  * OR .{table:start} 
  * OR .{table:end}
  * 
+ * table tag has className property it value goes into defaultClassName 
  * defaultClassName = ca.canon.fast.model.impl.SalesUploadWeekFct
+ * 
+ * foreign key definition:
+ * 
+ * .{table:start;className:ca.canon.fast.model.A}
+ *  ${id}
+ * .{table:end}
+ * 
+ *		.{table:start;className:ca.canon.fast.model.B
+ *				fk:afid:ca.canon.fast.model.A.id}
+ *			${id}
+ *			${afid}
+ *		.{table:end}
+ *  OR
+ *		.{table:start;className:ca.canon.fast.model.B}
+ *			${id}
+ *			${afid:ca.canon.fast.model.A.id}
+ *		.{table:end}
+ * 
+ * 
+ * 
  * @author ptitchkin
  *
  */
@@ -24,7 +45,7 @@ public class TableDescriptor extends Descriptor{
 	private static Logger logger = Logger.getLogger(TableDescriptor.class);
 	
 	//TODO - <AP> do we really need it or it is same as rowIndex? 
-	private int		index = 0; //current index in SERVICE_SHEET
+	//private int		index = 0; //current index in SERVICE_SHEET
 	
 	private boolean start = false;
 	private boolean end = false;
@@ -83,8 +104,8 @@ public class TableDescriptor extends Descriptor{
 		}
 	}
 	
-	public int getIndex() {return index;}
-	public void setIndex(int index) {this.index = index;}
+//	public int getIndex() {return index;}
+//	public void setIndex(int index) {this.index = index;}
 	public String getDefaultClassName() {return defaultClassName;}
 	public void setDefaultClassName(String defaultClassName) {this.defaultClassName = defaultClassName;}
 
