@@ -3,26 +3,40 @@ package com.avp.excel.template.engine;
 import ca.canon.fast.utils.GeneralUtil;
 
 public class ClassProperty extends Descriptor{
-	private String className; // used as key
-	private String propertyName;
-	private IConvertor convertor;
+	private String		className; // used as key
+	private String		propertyName;
+	private String		referencedEntity;
+	private IConvertor	convertor;
 	
 	/* 
 	 * very naive implementation 
 	 * input:	${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType},${ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}													
 	 *	or:		${month},${ca.canon.fast.model.impl.MonthToIntegerConvertor}
 	 * propertyName in 1st position might be in full format or just name
-	 * className: ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO
-	 * propertyName:userName
 	 * 
+	 * need to change format
+	 * [${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType},${ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}]
+	 * 
+	 * TO ['${'+name[:reference][;convertor:convertorClass]+'}']:
+	 * [${actualType}]
+	 * OR
+	 * [${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType}]
+	 * OR
+	 * [${actualType:referenceClass}]
+	 * OR
+	 * [${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType,convertor:ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}]
+	 * OR
+	 * [${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType,convertor:ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}]
 	 */
+
 	public ClassProperty(TableDescriptor td, String cellContent) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
 		if(td != null && !GeneralUtil.isEmpty(td.getDefaultClassName())){
 			className = td.getDefaultClassName();
 		}
 		//expected: ${properetyName},${convertor}
 		String descriptors[] = cellContent.split(",");
-		String fullPropertyName = descriptors[0]; // ${properetyName}
+		String propertyDesctiptor[] = descriptors[0].split(TAG_VALUE_DELIMITER); // ${properetyName} OR ${properetyName:refClassName}
+		String fullPropertyName = propertyDesctiptor[0];
 		fullPropertyName = stripDecoration(fullPropertyName);
 
 		int propertyStartIdx = fullPropertyName.lastIndexOf(".");
@@ -47,4 +61,8 @@ public class ClassProperty extends Descriptor{
 	public IConvertor getConvertor() {return convertor;}
 	//public void setConvertor(IConvertor convertor) {this.convertor = convertor;}
 	public String toString() {return "ClassProperty [className=" + className + ", propertyName=" + propertyName + "]";}
+	
+	public String getReferencedEntity() {
+		return referencedEntity;
+	}
 };

@@ -80,6 +80,9 @@ public class TableDescriptor extends Descriptor{
 		}
 	}
 
+	public TableDescriptor() {
+		// dummy Auto-generated constructor stub for jUnit test
+	}
 	
 	public TableDescriptor(String content) {
 		content = super.stripDecoration(content);
@@ -103,6 +106,8 @@ public class TableDescriptor extends Descriptor{
 		logger.debug("Create TableDescriptor ["+this.toString()+"]");
 	}
 	
+
+
 	public String getDefaultClassName() {return defaultClassName;}
 	public void setDefaultClassName(String defaultClassName) {this.defaultClassName = defaultClassName;}
 
