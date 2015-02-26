@@ -92,7 +92,6 @@ public class ExcelTemplateHelper extends Descriptor{
 	private Map<String,ArrayList<Object>> collectedBeansFromTablesAsMap = new HashMap<String, ArrayList<Object>>();
 	private Map<String,ArrayList<Object>> commonBeansAsMap = new HashMap<String, ArrayList<Object>>();
 
-	//moved to TableDescriptor: private HashMap<String, ClassProperty> tablePropertyMap = new HashMap<String, ClassProperty>();
 	/**
 	 * commonPropertyMap collect meta-data from SERVICE_SHEET related to shared/header bean
 	 */
@@ -112,11 +111,8 @@ public class ExcelTemplateHelper extends Descriptor{
 	 * @throws Exception
 	 */
 	public ExcelTemplateHelper(File fileToParse) throws Exception{
-		int tableIdx = 0;
-		TableDescriptor td = null;
-		//only to control embedded tables (table inside table)
+		//Stack is needed only to control embedded tables? TBR? (table inside table)
 		Stack<TableDescriptor> tableStack = new Stack<TableDescriptor>();
-		
 		try {
 				FileInputStream inputWbStream = new FileInputStream(fileToParse);
 				//Get the workbook instance for XLS file 
@@ -148,10 +144,9 @@ public class ExcelTemplateHelper extends Descriptor{
 						if(content.startsWith(START_TAG)){ // .{table:start} or .{table:end}
 							TableDescriptor tmpTd = new TableDescriptor(content); 
 							if(tmpTd.isStart()){
-								td = tmpTd;
-								td.setRowIndex(rowIdx+1);
-								tables.add(td);
-								tableStack.push(td);
+								tmpTd.setRowIndex(rowIdx+1);
+								tables.add(tmpTd);
+								tableStack.push(tmpTd);
 							}
 							if(tmpTd.isEnd()){
 								tableStack.pop();
@@ -159,12 +154,12 @@ public class ExcelTemplateHelper extends Descriptor{
 						}
 						
 						if(content.startsWith(START_VAR)){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
-							ClassProperty classProperty = new ClassProperty(td, content);
+							ClassProperty classProperty = new ClassProperty((tableStack.isEmpty())?null:tableStack.peek(), content);
 							String key = new StringBuilder().append(rowIdx).append("_").append(cellIdx).toString(); 
 							if(tableStack.isEmpty()){ //if not inside table store variable in commonPropertyMap 	
 								commonPropertyMap.put(key, classProperty);
 							}else{
-								TableDescriptor currentTableDescriptor = tableStack.peek(); 
+								TableDescriptor currentTableDescriptor = tableStack.peek();
 								currentTableDescriptor.getTablePropertyMap().put(key, classProperty);
 							}
 							
@@ -351,7 +346,7 @@ public class ExcelTemplateHelper extends Descriptor{
 	 * create instance of object (if not passed in) and populate properties from cells (described in template) 
 	 * return null if row is empty (null might trigger end of table)
 	 * @param propertyMap
-	 * @param collectedBeansMap - either commonBeanAsMap or resultMap
+	 * @param collectedEntityMap - either commonBeanAsMap or resultMap
 	 * @param entity
 	 * @param rowIdx
 	 * @param row
@@ -363,7 +358,7 @@ public class ExcelTemplateHelper extends Descriptor{
 	 * @throws NoSuchMethodException
 	 */
 	private Object pushRowToEntity(	Map<String, ClassProperty> propertyMap, 
-									Map<String,ArrayList<Object>> collectedBeansMap, 
+									Map<String,ArrayList<Object>> collectedEntityMap, 
 									Object entity, 
 									int rowIdx,  
 									Row row)
@@ -390,7 +385,7 @@ public class ExcelTemplateHelper extends Descriptor{
 				pushCellToEntity(entity, cell, classProperty);
 				
 				//TODO - <AP> what if collectedMap does NOT contain class name? It's not possible because 1-st pass should collect all classes
-				ArrayList<Object> entities = collectedBeansMap.get(classProperty.getClassName());
+				ArrayList<Object> entities = collectedEntityMap.get(classProperty.getClassName());
 				if(!entities.contains(entity)){
 				entities.add(entity);
 				}// if cell not empty

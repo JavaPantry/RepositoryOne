@@ -1,6 +1,7 @@
 package com.avp.excel.template.engine;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -43,9 +44,6 @@ import org.apache.log4j.Logger;
 public class TableDescriptor extends Descriptor{
 
 	private static Logger logger = Logger.getLogger(TableDescriptor.class);
-	
-	//TODO - <AP> do we really need it or it is same as rowIndex? 
-	//private int		index = 0; //current index in SERVICE_SHEET
 	
 	private boolean start = false;
 	private boolean end = false;
@@ -102,10 +100,9 @@ public class TableDescriptor extends Descriptor{
 				}
 			}
 		}
+		logger.debug("Create TableDescriptor ["+this.toString()+"]");
 	}
 	
-//	public int getIndex() {return index;}
-//	public void setIndex(int index) {this.index = index;}
 	public String getDefaultClassName() {return defaultClassName;}
 	public void setDefaultClassName(String defaultClassName) {this.defaultClassName = defaultClassName;}
 
@@ -120,4 +117,18 @@ public class TableDescriptor extends Descriptor{
 
 	public String[] getArrayOfExcludedProperties() {return arrayOfExcludedProperties;}
 	public void setArrayOfExcludedProperties(String[] arrayOfExcludedProperties) {this.arrayOfExcludedProperties = arrayOfExcludedProperties;}
+
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("TableDescriptor [start=").append(start)
+				.append(", end=").append(end).append(", defaultClassName=")
+				.append(defaultClassName).append(", tablePropertyMap=")
+				.append(tablePropertyMap)
+				.append(", arrayOfExcludedProperties=")
+				.append(Arrays.toString(arrayOfExcludedProperties))
+				.append(", rowIndex=").append(rowIndex).append("]");
+		return builder.toString();
+	}
 }
