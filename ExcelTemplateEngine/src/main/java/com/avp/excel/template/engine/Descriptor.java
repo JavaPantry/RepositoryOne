@@ -1,4 +1,10 @@
 package com.avp.excel.template.engine;
+
+import java.lang.reflect.Type;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 /**
  * Constants and utility methods for parsing template DSL
  * 
@@ -25,5 +31,12 @@ public abstract class Descriptor {
 	 */
 	public static String stripDecoration(String inputStr) {
 		return inputStr.substring(START_TAG.length(), inputStr.length()-CLOSE_TAG.length());
+	}
+	public static String stripPrefixChar(String inputStr) {
+		return inputStr.substring(1, inputStr.length());
+	}
+	public static <T> T json2Obj(String json, Type type) {
+		Gson gson = new GsonBuilder().create();
+		return gson.fromJson(json, type);
 	}
 }

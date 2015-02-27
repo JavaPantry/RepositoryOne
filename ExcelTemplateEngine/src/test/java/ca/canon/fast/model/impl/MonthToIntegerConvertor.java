@@ -21,6 +21,8 @@ import com.avp.excel.template.engine.IConvertor;
  * 
  */
 public class MonthToIntegerConvertor implements IConvertor {
+	public MonthToIntegerConvertor() {}
+	
 	private String[] months = {"JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"}; 
 	public Object convert(Object input) {
 		String monthName = ((String)input).toUpperCase();
