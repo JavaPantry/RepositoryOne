@@ -66,3 +66,33 @@ public class ClassProperty extends Descriptor{
 		return referencedEntity;
 	}
 };
+
+/*
+ 	public ClassProperty(TableDescriptor td, String cellContent) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+		if(td != null && !GeneralUtil.isEmpty(td.getDefaultClassName())){
+			className = td.getDefaultClassName();
+		}
+		//expected: ${properetyName},${convertor}
+		String descriptors[] = cellContent.split(",");
+		String fullPropertyName = descriptors[0]; // ${properetyName}
+		fullPropertyName = stripDecoration(fullPropertyName);
+
+		int propertyStartIdx = fullPropertyName.lastIndexOf(".");
+		if(propertyStartIdx != NOT_FOUND){
+			className = fullPropertyName.substring(0, propertyStartIdx);
+			propertyName = fullPropertyName.substring(propertyStartIdx+1);
+		}else{
+			propertyName = fullPropertyName;
+		}
+		
+		// process if optional converter provided
+		if(descriptors.length>1 && !GeneralUtil.isEmpty(descriptors[1])){
+			String convertorName = descriptors[1]; 
+			convertorName = stripDecoration(convertorName);
+			Class<?>  clazz = Class.forName(convertorName);
+			convertor = (IConvertor) clazz.newInstance();
+		}
+		
+	}
+
+ */

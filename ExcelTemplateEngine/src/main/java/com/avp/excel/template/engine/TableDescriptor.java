@@ -37,6 +37,14 @@ import org.apache.log4j.Logger;
  *		.{table:end}
  * 
  * 
+ * - what about pure json?
+ * 	.{start:true;defaultClassName:ca.canon.fast.model.B}
+ *			${propertyName:id, primaryKey:true}
+ *			${propertyName:afid,reference:ca.canon.fast.model.A.id}
+ *			${propertyName:month,converter:ca.canon.fast.model.MonthConverter}
+ *	.{table:end}
+ * - that's real BS
+ * 
  * 
  * @author ptitchkin
  *
