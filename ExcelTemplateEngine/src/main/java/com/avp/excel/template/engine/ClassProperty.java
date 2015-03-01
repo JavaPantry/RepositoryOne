@@ -1,7 +1,17 @@
 package com.avp.excel.template.engine;
 
 import ca.canon.fast.utils.GeneralUtil;
-
+/**
+ * input:
+ * cell content = ${propertyName:"ca.canon.fast.model.impl.SalesUploadWeekFct.itemCode",referencedEntity:"ca.canon.fast.model.impl.ActualDTO.id"
+ * 					,convertorClassName:"ca.canon.fast.model.impl.MonthToIntegerConvertor"}
+ * OR without foreign key reference
+ * cell content = ${propertyName:"ca.canon.fast.model.impl.SalesUploadWeekFct.itemCode",convertorClassName:"ca.canon.fast.model.impl.MonthToIntegerConvertor"}
+ * 
+ * OR with default class in table descriptor, no converter and no foreign key reference
+ * cell content =  ${propertyName:"itemCode"}
+ * @author ptitchkin
+ */
 public class ClassProperty extends Descriptor{
 	private String		className; // used as key
 	private String		propertyName;
@@ -9,27 +19,9 @@ public class ClassProperty extends Descriptor{
 	private String		convertorClassName;
 	private IConvertor	convertor;
 	
-	/* 
-	 * very naive implementation 
-	 * input:	${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType},${ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}													
-	 *	or:		${month},${ca.canon.fast.model.impl.MonthToIntegerConvertor}
-	 * propertyName in 1st position might be in full format or just name
-	 * 
-	 * need to change format
-	 * [${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType},${ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}]
-	 * 
-	 * TO ['${'+name[:reference][;convertor:convertorClass]+'}']:
-	 * [${actualType}]
-	 * OR
-	 * [${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType}]
-	 * OR
-	 * [${actualType:referenceClass}]
-	 * OR
-	 * [${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType,convertor:ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}]
-	 * OR
-	 * [${ca.canon.fast.model.impl.SalesUploadWeekFct.actualType,convertor:ca.canon.fast.model.impl.ActualsTypeToAcronimConvertor}]
+	/** 
+	 * initialize cell descriptor by assigning default class to property and instantiate cell value converter if provided 									
 	 */
-	
 	public void init(String defaultClassName) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		int propertyStartIdx = propertyName.lastIndexOf(".");
 		if(propertyStartIdx != NOT_FOUND){
@@ -53,36 +45,5 @@ public class ClassProperty extends Descriptor{
 	public IConvertor getConvertor() {return convertor;}//public void setConvertor(IConvertor convertor) {this.convertor = convertor;}
 	public String toString() {return "ClassProperty [className=" + className + ", propertyName=" + propertyName + "]";}
 	public String getReferencedEntity() {return referencedEntity;}
-
-	
 };
 
-/*
- 	public ClassProperty(TableDescriptor td, String cellContent) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		if(td != null && !GeneralUtil.isEmpty(td.getDefaultClassName())){
-			className = td.getDefaultClassName();
-		}
-		//expected: ${properetyName},${convertor}
-		String descriptors[] = cellContent.split(",");
-		String fullPropertyName = descriptors[0]; // ${properetyName}
-		fullPropertyName = stripDecoration(fullPropertyName);
-
-		int propertyStartIdx = fullPropertyName.lastIndexOf(".");
-		if(propertyStartIdx != NOT_FOUND){
-			className = fullPropertyName.substring(0, propertyStartIdx);
-			propertyName = fullPropertyName.substring(propertyStartIdx+1);
-		}else{
-			propertyName = fullPropertyName;
-		}
-		
-		// process if optional converter provided
-		if(descriptors.length>1 && !GeneralUtil.isEmpty(descriptors[1])){
-			String convertorName = descriptors[1]; 
-			convertorName = stripDecoration(convertorName);
-			Class<?>  clazz = Class.forName(convertorName);
-			convertor = (IConvertor) clazz.newInstance();
-		}
-		
-	}
-
- */

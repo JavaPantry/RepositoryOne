@@ -154,7 +154,14 @@ public class ExcelTemplateHelper extends Descriptor{
 						}
 						
 						if(content.startsWith(START_VAR)){  //${ca.canon.fast.web.sales.SalesMonthFctSpreadsheetController$ActualsDTO.userName}
-							ClassProperty classProperty = new ClassProperty((tableStack.isEmpty())?null:tableStack.peek(), content);
+							//ClassProperty classProperty = new ClassProperty((tableStack.isEmpty())?null:tableStack.peek(), content);
+							content = Descriptor.stripPrefixChar(content);
+							
+							ClassProperty classProperty = Descriptor.json2Obj(content, ClassProperty.class);
+							TableDescriptor td =(tableStack.isEmpty())?null:tableStack.peek();
+							String defaultClassName = (td == null)? null: td.getDefaultClassName();
+							classProperty.init(defaultClassName);
+							
 							String key = new StringBuilder().append(rowIdx).append("_").append(cellIdx).toString(); 
 							if(tableStack.isEmpty()){ //if not inside table store variable in commonPropertyMap 	
 								commonPropertyMap.put(key, classProperty);
