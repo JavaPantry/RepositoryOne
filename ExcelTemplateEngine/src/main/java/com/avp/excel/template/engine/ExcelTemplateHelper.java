@@ -47,7 +47,7 @@ import ca.canon.fast.utils.GeneralUtil;
  *		.{table:start;className:ca.canon.fast.model.impl.SalesUploadWeekFct}
  *		${itemCode}|${ca.canon.fast.model.impl.SalesUploadWeekFct.billTo}|${sellTo}|${year}|${month},${ca.canon.fast.model.impl.MonthToIntegerConvertor}${dollar1}|${unit1}|${dollar2}|${unit2}|${dollar3}|${unit3}|${dollar4}|${unit4}|${dollar5}|${unit5}
  *		.{table:end;className:ca.canon.fast.model.impl.SalesUploadWeekFct
- * v 0.1.3 - Add multiple table support
+ * v 0.1.3 - Added multiple table support
  * 
  * @author ptitchkin
  *
