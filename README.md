@@ -8,5 +8,5 @@ Main class ExcelTemplateHelper aquire template from sheet "SERVICE_SHEET" in con
 
 Current version supports multiple tables per workbook.
 
-Check out tagged version 0.1.3.1 - Multiple table support, refactored ClassProperty class to accept json cell descriptor
+Check out tagged version 0.1.3.1 (Multiple table support, refactored ClassProperty class to accept json cell descriptor)
 and run jUnit ExcelTemplateHelperTest (works with ForecastTemplateMultiTab.xls) to get an idea how it works. 
