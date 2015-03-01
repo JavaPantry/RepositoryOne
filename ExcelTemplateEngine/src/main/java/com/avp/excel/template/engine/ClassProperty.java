@@ -2,6 +2,7 @@ package com.avp.excel.template.engine;
 
 import ca.canon.fast.utils.GeneralUtil;
 /**
+ * ClassProperty - cell descriptor
  * input:
  * cell content = ${propertyName:"ca.canon.fast.model.impl.SalesUploadWeekFct.itemCode",referencedEntity:"ca.canon.fast.model.impl.ActualDTO.id"
  * 					,convertorClassName:"ca.canon.fast.model.impl.MonthToIntegerConvertor"}
