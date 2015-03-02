@@ -16,6 +16,7 @@ import java.util.Stack;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.beanutils.converters.IntegerConverter;
+import org.apache.commons.beanutils.converters.LongConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -209,6 +210,9 @@ public class ExcelTemplateHelper extends Descriptor{
 		Map<String, Map<String, ArrayList<Object>>> mapOfSheets = new HashMap<String, Map<String, ArrayList<Object>>>();
 		for (int sheetIdx = 0; sheetIdx < numberOfSheets; sheetIdx++) {
 			String sheetName = workbook.getSheetName(sheetIdx);
+			if(sheetName.equalsIgnoreCase("OnHand_Data"))
+				logger.debug("Debug stop");
+			
 			if(sheetName.endsWith(DATASHEET_SUFFIX)){
 				Map<String, ArrayList<Object>> objectsFromDataSheet = parseDataSheet(workbook.getSheetAt(sheetIdx));
 				String dataName = sheetName.substring(0,sheetName.indexOf(DATASHEET_SUFFIX));
@@ -457,7 +461,8 @@ public class ExcelTemplateHelper extends Descriptor{
 	 * @throws IllegalAccessException 
 	 */
 	private void setProperty(Object entity, String propertyName, Object value) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException{
-		IntegerConverter intConverter = new IntegerConverter();
+		IntegerConverter	intConverter = new IntegerConverter();
+		LongConverter		longConverter = new LongConverter();
 		Object dstValue = null;
 		PropertyDescriptor descriptor = PropertyUtils.getPropertyDescriptor(entity, propertyName);
 		if(descriptor == null){
@@ -468,6 +473,8 @@ public class ExcelTemplateHelper extends Descriptor{
 		String clazzName = typeClazz.getName().toLowerCase();
 		if(clazzName.endsWith("int") || clazzName.endsWith("integer")){
 			dstValue = intConverter.convert(Integer.class, value);
+		}if(clazzName.endsWith("long")){
+			dstValue = longConverter.convert(Long.class, value);
 		}else if(clazzName.endsWith("string")){
 			 StringConverter converter = new  StringConverter();
 			 if(value instanceof Double){

@@ -1,6 +1,8 @@
 package ca.canon.fast.model.impl;
 
 public class ActualsDTO{
+	private Long	id;
+	private Long	salesUploadWeekFctId;
 	private String	userName;
 	private String	itemCode;	
 	private String	billTo;
@@ -32,10 +34,17 @@ public class ActualsDTO{
 	public int getValue() {return value;}
 	public void setValue(int value) {this.value = value;}
 
+	public Long getId() {return id;}
+	public void setId(Long id) {this.id = id;}
+	public Long getSalesUploadWeekFctId() {return salesUploadWeekFctId;}
+	public void setSalesUploadWeekFctId(Long salesUploadWeekFctId) {this.salesUploadWeekFctId = salesUploadWeekFctId;}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("ActualsDTO [userName=").append(userName)
+				.append(", id=").append(id)
+				.append(", salesUploadWeekFctId=").append(salesUploadWeekFctId)
 				.append(", itemCode=").append(itemCode)
 				.append(", billTo=").append(billTo)
 				.append(", sellTo=").append(sellTo)
@@ -45,6 +54,7 @@ public class ActualsDTO{
 				.append("]");
 		return builder.toString();
 	}
+
 
 
 
