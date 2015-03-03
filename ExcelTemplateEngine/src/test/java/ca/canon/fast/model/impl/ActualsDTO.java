@@ -55,8 +55,5 @@ public class ActualsDTO{
 		return builder.toString();
 	}
 
-
-
-
 }
 

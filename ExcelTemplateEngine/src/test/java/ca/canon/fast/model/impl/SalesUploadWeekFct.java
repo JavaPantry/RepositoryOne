@@ -1,5 +1,8 @@
 package ca.canon.fast.model.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @SuppressWarnings("serial")
 public class SalesUploadWeekFct extends BaseAuditEntity{
@@ -78,6 +81,8 @@ public class SalesUploadWeekFct extends BaseAuditEntity{
 	private int 	dollar5;
 	private int 	unit5;
 	private String	actualType;
+
+	List<ActualsDTO> actualsDTOs = new ArrayList<ActualsDTO>();
 	
 	public SalesUploadWeekFct() {
 		super();
@@ -143,4 +148,7 @@ public class SalesUploadWeekFct extends BaseAuditEntity{
 	public void setSellTo(String sellTo) {this.sellTo = sellTo;}
 	public String getErrorMessage() {return errorMessage;}
 	public void setErrorMessage(String errorMessage) {this.errorMessage = errorMessage;}
+
+	public List<ActualsDTO> getActualsDTOs() {return actualsDTOs;}
+	public void setActualsDTOs(List<ActualsDTO> actualsDTOs) {this.actualsDTOs = actualsDTOs;}
 }
