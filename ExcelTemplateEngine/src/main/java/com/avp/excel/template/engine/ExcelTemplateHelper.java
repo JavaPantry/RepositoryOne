@@ -83,10 +83,13 @@ public class ExcelTemplateHelper extends Descriptor{
 	
 	private HSSFWorkbook workbook;
 	private HSSFSheet metaSheet;
-	
-	private List<TableDescriptor> tables = new ArrayList<TableDescriptor>();
-	public List<TableDescriptor> getTables() {return tables;}
-	public void setTables(List<TableDescriptor> tables) {this.tables = tables;}  
+
+	private Map<String, Map<String, ArrayList<Object>>> mapOfSheets = new HashMap<String, Map<String, ArrayList<Object>>>();
+	public Map<String, Map<String, ArrayList<Object>>> getMapOfSheets() {return mapOfSheets;}
+
+	private List<TableDescriptor> descriptorTables = new ArrayList<TableDescriptor>();
+	public List<TableDescriptor> getTables() {return descriptorTables;}
+	public void setTables(List<TableDescriptor> tables) {this.descriptorTables = tables;}  
 
 	/**
 	 * 	resultMap and commonBeanAsMap are used to store parsing result done in c-tor ExcelTemplateHelper(File fileToParse) 
@@ -148,7 +151,7 @@ public class ExcelTemplateHelper extends Descriptor{
 							TableDescriptor tmpTd = new TableDescriptor(content); 
 							if(tmpTd.isStart()){
 								tmpTd.setRowIndex(rowIdx+1);
-								tables.add(tmpTd);
+								descriptorTables.add(tmpTd);
 								tableStack.push(tmpTd);
 							}
 							if(tmpTd.isEnd()){
@@ -186,7 +189,7 @@ public class ExcelTemplateHelper extends Descriptor{
 				}//eof while(rowIterator.hasNext())
 
 				//collect excludeArray[][] for each TableDescriptor in
-				for (TableDescriptor tableDescriptor : tables) {
+				for (TableDescriptor tableDescriptor : descriptorTables) {
 					tableDescriptor.updateExcludeFields();
 				} 
 				logger.debug("End of template sheet in workbook");
@@ -206,8 +209,7 @@ public class ExcelTemplateHelper extends Descriptor{
 	 */
 	public Map<String, Map<String, ArrayList<Object>>> parseDataSheets() throws Exception {
 		int numberOfSheets  = workbook.getNumberOfSheets();
-		//List<HSSFSheet> dataSheets = new ArrayList<HSSFSheet>();
-		Map<String, Map<String, ArrayList<Object>>> mapOfSheets = new HashMap<String, Map<String, ArrayList<Object>>>();
+		
 		for (int sheetIdx = 0; sheetIdx < numberOfSheets; sheetIdx++) {
 			String sheetName = workbook.getSheetName(sheetIdx);
 			if(sheetName.equalsIgnoreCase("OnHand_Data"))
@@ -271,10 +273,10 @@ public class ExcelTemplateHelper extends Descriptor{
 				}
 				//we can get here only when inside table (within .{table:start} and .{table:end} tags)
 				//Collect entities from current table body marked with table tag .{table:ends} 
-				Object entity = pushRowToEntity(tables.get(currentTableIdx).getTablePropertyMap(), collectedBeansFromTablesAsMap, null, tables.get(currentTableIdx).getRowIndex(), row);
+				Object entity = pushRowToEntity(descriptorTables.get(currentTableIdx).getTablePropertyMap(), collectedBeansFromTablesAsMap, null, descriptorTables.get(currentTableIdx).getRowIndex(), row);
 				if(entity == null)//TODO - <AP> any other valid way to detect end of data?
 					break;
-				populateCommonFields(entity, tables.get(currentTableIdx).getArrayOfExcludedProperties());//(commonEntity, entity);
+				populateCommonFields(entity, descriptorTables.get(currentTableIdx).getArrayOfExcludedProperties());//(commonEntity, entity);
 				rowIdx++;
 			}
 			logger.debug("End of data sheet in workbook");
