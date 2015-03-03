@@ -35,13 +35,12 @@ public class ExcelTemplateHelperTest {
 	public void testParseExcelDataMultiTab() throws Exception {
 		processExcelData("ForecastTemplateMultiTab.xls");
 	}
-
+/*
 	@Test
 	public void testParseExcelDataExt() throws Exception {
-		processExcelData("ForecastTemplateMultiTabCrossRef.xls");
+		processExcelData("ForecastTemplateExt.xls");
 	}
-
-/*	
+	
 	@Test
 	public void testParseExcelData() throws Exception {
 		processExcelData("ForecastTemplate.xls");
