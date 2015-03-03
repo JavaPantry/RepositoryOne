@@ -122,7 +122,8 @@ public class SalesUploadWeekFct extends BaseAuditEntity{
 	
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("SalesUploadWeekFct [year=").append(year)
+		builder.append("SalesUploadWeekFct [id=").append(getId())
+				.append(", year=").append(year)
 				.append(", month=").append(month).append(", itemCode=").append(itemCode)
 				.append(", sellTo=").append(sellTo)
 				.append(", billTo=").append(billTo)
