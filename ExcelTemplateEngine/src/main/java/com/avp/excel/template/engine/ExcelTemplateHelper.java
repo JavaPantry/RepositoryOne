@@ -50,8 +50,8 @@ import ca.canon.fast.utils.GeneralUtil;
  *		.{table:end;className:ca.canon.fast.model.impl.SalesUploadWeekFct
  * v 0.1.3 - Added multiple table support
  * v 0.1.3.1 - Multiple table support, refactored ClassProperty class to accept json cell descriptor
- * 
- *  
+ *				- add LongConverter		longConverter = new LongConverter(); to  setProperty(Object entity, ...
+ *
  * @author ptitchkin
  *
  */
