@@ -279,6 +279,10 @@ public class ExcelTemplateHelper extends Descriptor{
 				populateCommonFields(entity, descriptorTables.get(currentTableIdx).getArrayOfExcludedProperties());//(commonEntity, entity);
 				rowIdx++;
 			}
+			logger.debug("build references");
+			ReferenceFinder referenceFinder = new ReferenceFinder(null);
+			
+			
 			logger.debug("End of data sheet in workbook");
 		} catch (IllegalAccessException e) {
 			logger.error(e,e);

@@ -11,7 +11,9 @@ package com.avp.excel.template.engine;
 public class ReferenceFinder {
 	
 	/**
-	 * 
+	 * what to pass as String content from ExcelTemplateEngine/src/main/java/com/avp/excel/template/engine/ExcelTemplateHelper.java?
+	 * at the end of parseDataSheet(HSSFSheet dataSheet) you have access to descriptors and collected data
+	 * pass it here! and test in ReferenceFinderTest
 	 */
 	public ReferenceFinder(String content) {
 	}

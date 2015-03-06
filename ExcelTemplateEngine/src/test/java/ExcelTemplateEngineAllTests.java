@@ -4,10 +4,12 @@ import org.junit.runners.Suite.SuiteClasses;
 
 import com.avp.excel.template.engine.ClassPropertyTest;
 import com.avp.excel.template.engine.ExcelTemplateHelperTest;
+import com.avp.excel.template.engine.ReferenceFinderTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	ExcelTemplateHelperTest.class
+	ReferenceFinderTest.class
+	,ExcelTemplateHelperTest.class
 	,ClassPropertyTest.class
 	//DealerGroupControllerTest.class
 	//FastMonthForecastLifeCycleTest.class 
