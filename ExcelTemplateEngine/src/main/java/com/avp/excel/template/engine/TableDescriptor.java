@@ -59,7 +59,7 @@ public class TableDescriptor extends Descriptor{
 	private HashMap<String, ClassProperty>	tablePropertyMap = new HashMap<String, ClassProperty>();
 
 	/**
-	 * 	store properties which will not copied from header bean to table enteties
+	 * 	store properties which will not copied from header bean to table entities
 	 */
 	private String[]						arrayOfExcludedProperties = null;
 

@@ -14,8 +14,6 @@ import org.junit.Test;
 
 
 /**
- * 
- * Test for branch "Refactoring" 
  * @author ptitchkin
  *
  */
@@ -31,10 +29,10 @@ public class ExcelTemplateHelperTest {
 	}
 	
 
-	@Test
+/*	@Test
 	public void testParseExcelDataMultiTab() throws Exception {
 		processExcelData("ForecastTemplateMultiTab.xls");
-	}
+	}*/
 
 	@Test
 	public void testParseExcelDataExt() throws Exception {

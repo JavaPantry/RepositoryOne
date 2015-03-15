@@ -213,13 +213,13 @@ public class ExcelTemplateHelper extends Descriptor{
 		for (int sheetIdx = 0; sheetIdx < numberOfSheets; sheetIdx++) {
 			String sheetName = workbook.getSheetName(sheetIdx);
 			if(sheetName.equalsIgnoreCase("OnHand_Data"))
-				logger.debug("Debug stop");
-			
+				logger.debug("Debug sheetName ='"+sheetName+"'");
+			logger.debug("Process spreadsheet '"+sheetName+"'...");
 			if(sheetName.endsWith(DATASHEET_SUFFIX)){
 				Map<String, ArrayList<Object>> objectsFromDataSheet = parseDataSheet(workbook.getSheetAt(sheetIdx));
 				String dataName = sheetName.substring(0,sheetName.indexOf(DATASHEET_SUFFIX));
 				mapOfSheets.put(dataName, objectsFromDataSheet);
-			}
+			}logger.debug("Finish process spreadsheet '"+sheetName+"'...");
 		}
 		return mapOfSheets;
 	}
@@ -280,7 +280,7 @@ public class ExcelTemplateHelper extends Descriptor{
 				rowIdx++;
 			}
 			logger.debug("build references");
-			ReferenceFinder referenceFinder = new ReferenceFinder(null);
+			ReferenceFinder.linkTables(descriptorTables, collectedBeansFromTablesAsMap);
 			
 			
 			logger.debug("End of data sheet in workbook");

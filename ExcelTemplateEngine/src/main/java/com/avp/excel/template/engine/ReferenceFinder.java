@@ -1,5 +1,9 @@
 package com.avp.excel.template.engine;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * ReferenceFinder - Detects references in tables within one sheet
  * If table column has property referencedEntity
@@ -15,7 +19,17 @@ public class ReferenceFinder {
 	 * at the end of parseDataSheet(HSSFSheet dataSheet) you have access to descriptors and collected data
 	 * pass it here! and test in ReferenceFinderTest
 	 */
-	public ReferenceFinder(String content) {
+	@Deprecated
+	private ReferenceFinder(String content) {
+	}
+
+//	public ReferenceFinder(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) {
+//		// TODO Auto-generated constructor stub
+//	}
+
+	public static void linkTables(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) {
+
+		
 	}
 
 }
