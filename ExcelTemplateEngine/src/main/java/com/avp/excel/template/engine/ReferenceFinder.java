@@ -3,6 +3,9 @@ package com.avp.excel.template.engine;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 /**
  * ReferenceFinder - Detects references in tables within one sheet
@@ -13,7 +16,7 @@ import java.util.Map;
  *
  */
 public class ReferenceFinder {
-	
+	private static Logger logger = Logger.getLogger(ReferenceFinder.class);
 	/**
 	 * what to pass as String content from ExcelTemplateEngine/src/main/java/com/avp/excel/template/engine/ExcelTemplateHelper.java?
 	 * at the end of parseDataSheet(HSSFSheet dataSheet) you have access to descriptors and collected data
@@ -28,8 +31,11 @@ public class ReferenceFinder {
 //	}
 
 	public static void linkTables(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) {
-
-		
+		logger.debug("descriptorTables = "+descriptorTables);
+		Set<String> setOfBeans = collectedBeansFromTablesAsMap.keySet();
+		for (String beanKey : setOfBeans) {
+			logger.debug("beanKey = "+beanKey);
+		}
 	}
 
 }

@@ -44,7 +44,7 @@ public class ClassProperty extends Descriptor{
 	}
 	public String getPropertyName() {return propertyName;}//public void setPropertyName(String propertyName) {this.propertyName = propertyName;}
 	public IConvertor getConvertor() {return convertor;}//public void setConvertor(IConvertor convertor) {this.convertor = convertor;}
-	public String toString() {return "ClassProperty [className=" + className + ", propertyName=" + propertyName + "]";}
+	public String toString() {return "ClassProperty [className=" + className + ", propertyName=" + propertyName + ", referencedEntity="+referencedEntity+"]";}
 	public String getReferencedEntity() {return referencedEntity;}
 };
 
