@@ -2,6 +2,7 @@ package com.avp.excel.template.engine;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,7 @@ public class ReferenceFinderTest {
 	}
 
 	@Test
-	public void testReferenceFinder() {
+	public void testReferenceFinder() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		ReferenceFinder.linkTables(descriptorTables, collectedBeansFromTablesAsMap);
 	}
 

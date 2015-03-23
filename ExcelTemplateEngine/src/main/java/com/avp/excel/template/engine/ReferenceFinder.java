@@ -1,11 +1,18 @@
 package com.avp.excel.template.engine;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.lang.reflect.Type;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
+
+import ca.canon.fast.utils.GeneralUtil;
 
 /**
  * ReferenceFinder - Detects references in tables within one sheet
@@ -26,27 +33,59 @@ public class ReferenceFinder {
 	private ReferenceFinder(String content) {
 	}
 
-//	public ReferenceFinder(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) {
-//		// TODO Auto-generated constructor stub
-//	}
-
-	public static void linkTables(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) {
+	public static void linkTables(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		logger.debug("descriptorTables = "+descriptorTables);
 		Set<String> setOfBeans = collectedBeansFromTablesAsMap.keySet();
 		//scan tables for beans with references
 		for (String beanKey : setOfBeans) {
 			logger.debug("beanKey = "+beanKey);
+			int startClassNameIdx = beanKey.lastIndexOf(".");
+			String entityClassName = beanKey.substring(startClassNameIdx+1).toLowerCase();
 			ArrayList<Object> table = collectedBeansFromTablesAsMap.get(beanKey);
 			TableDescriptor td = getDestcriptor(descriptorTables, beanKey);
-			List<ClassProperty> references = td.getReferences();
-			if(td == null)
+			if(td == null)//not possible?
 				continue;
-			for (Object object : table) {
-				logger.debug("\tobject = "+object);
+			List<ClassProperty> references = td.getReferences();
+			for (ClassProperty refClassProperty : references) {
+				int startPropertyIdx = refClassProperty.getReferencedEntity().lastIndexOf(".");
+				if(startPropertyIdx<0) continue;
+				String refClassName = refClassProperty.getReferencedEntity().substring(0,startPropertyIdx);
+				String refPropertyName = refClassProperty.getReferencedEntity().substring(startPropertyIdx+1);
+				String ptrPropertyName = refClassProperty.getPropertyName();
 				
-			}
-		}
-	}
+				List<Object> referedBeans = collectedBeansFromTablesAsMap.get(refClassName);
+				if(GeneralUtil.isEmpty(referedBeans))continue;
+				
+				//link all objects in table
+				for (Object object : table) {
+					logger.debug("\tobject = "+object);
+					Object dstValue = PropertyUtils.getProperty(object, ptrPropertyName);
+					logger.debug("\tRef ptrPropertyName to refClassProperty.getReferencedEntity() = " + dstValue);
+					//scan all referedBeans for instance with refPropertyName equal dstValue 
+					for(Object referedBean:referedBeans){
+						Object refValue = PropertyUtils.getProperty(referedBean, refPropertyName);
+						logger.debug("\trefValue = " + refValue);
+						if(dstValue.equals(refValue)){
+							logger.debug("\treferedBean {"+referedBean+"} link to {" + object+"}");
+							//find where I can insert reference
+							PropertyDescriptor[] propertyDescriptors	= PropertyUtils.getPropertyDescriptors(referedBean);
+							for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+								logger.debug("\t\tpropertyDescriptor "+propertyDescriptor);
+								Class<?> propertyType = propertyDescriptor.getPropertyType();
+								//if( propertyType.getClass().equals(List.class)  ){
+								if( propertyType==List.class && propertyDescriptor.getName().toLowerCase().indexOf(entityClassName)>=0){
+									logger.debug("\t\t"+propertyDescriptor.getName()+ " is List of "+ entityClassName);
+									List list = (List)PropertyUtils.getProperty(referedBean, propertyDescriptor.getName());
+									list.add(object);
+								}
+							}
+							
+						}
+					}//eof for all refered beans
+				}//eof for all object in table
+			}//eof for all refs
+		}//eof for all tables
+	}//eof linkTables
 
 	private static TableDescriptor getDestcriptor(	List<TableDescriptor> descriptorTables, String className) {
 		for (TableDescriptor tableDescriptor : descriptorTables) {
@@ -55,5 +94,15 @@ public class ReferenceFinder {
 		}
 		return null;
 	}
+	//http://qussay.com/2013/09/28/handling-java-generic-types-with-reflection/
+//import java.lang.reflect.Type;	
+	public static Type[] getParameterizedTypes(Object object) {
+		    Type superclassType = object.getClass().getGenericSuperclass();
+		    if (!ParameterizedType.class.isAssignableFrom(superclassType.getClass())) {
+		        return null;
+		    }
+		    return ((ParameterizedType)superclassType).getActualTypeArguments();
+		}
+
 
 }

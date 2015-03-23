@@ -146,7 +146,10 @@ public class TableDescriptor extends Descriptor{
 				.append(", rowIndex=").append(rowIndex).append("]");
 		return builder.toString();
 	}
-
+	/**
+	 * 
+	 * @return not null list of ClassProperties which are reference to other table (can be empty)
+	 */
 	public List<ClassProperty> getReferences() {
 		List<ClassProperty> references = new ArrayList<ClassProperty>();//tablePropertyMap
 		Set<String> keys = tablePropertyMap.keySet();
