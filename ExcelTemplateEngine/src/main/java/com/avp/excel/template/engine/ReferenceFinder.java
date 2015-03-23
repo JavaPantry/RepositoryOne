@@ -33,9 +33,25 @@ public class ReferenceFinder {
 	public static void linkTables(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) {
 		logger.debug("descriptorTables = "+descriptorTables);
 		Set<String> setOfBeans = collectedBeansFromTablesAsMap.keySet();
+		//scan tables for beans with references
 		for (String beanKey : setOfBeans) {
 			logger.debug("beanKey = "+beanKey);
+			ArrayList<Object> table = collectedBeansFromTablesAsMap.get(beanKey);
+			TableDescriptor td = getDestcriptor(descriptorTables, beanKey);
+			if(td == null)
+				continue;
+			for (Object object : table) {
+				logger.debug("\tobject = "+object);
+			}
 		}
+	}
+
+	private static TableDescriptor getDestcriptor(	List<TableDescriptor> descriptorTables, String className) {
+		for (TableDescriptor tableDescriptor : descriptorTables) {
+			if(tableDescriptor.getDefaultClassName().equals(className))
+				return tableDescriptor;
+		}
+		return null;
 	}
 
 }

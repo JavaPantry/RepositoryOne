@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import ca.canon.fast.utils.GeneralUtil;
+
 /**
  * parse and store table descriptor (TODO - AP - json descriptor? flex json? gson?)
  * collection/map of cells in table 
@@ -143,5 +145,17 @@ public class TableDescriptor extends Descriptor{
 				.append(Arrays.toString(arrayOfExcludedProperties))
 				.append(", rowIndex=").append(rowIndex).append("]");
 		return builder.toString();
+	}
+
+	public List<ClassProperty> getReferences() {
+		List<ClassProperty> references = new ArrayList<ClassProperty>();//tablePropertyMap
+		Set<String> keys = tablePropertyMap.keySet();
+		for (String key : keys) {
+			ClassProperty classProperty = tablePropertyMap.get(key);
+			if(!GeneralUtil.isEmpty(classProperty.getReferencedEntity())){
+				references.add(classProperty);
+			}
+		}
+		return references;
 	}
 }
