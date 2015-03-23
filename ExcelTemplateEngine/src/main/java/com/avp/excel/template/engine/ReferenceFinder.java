@@ -38,10 +38,12 @@ public class ReferenceFinder {
 			logger.debug("beanKey = "+beanKey);
 			ArrayList<Object> table = collectedBeansFromTablesAsMap.get(beanKey);
 			TableDescriptor td = getDestcriptor(descriptorTables, beanKey);
+			List<ClassProperty> references = td.getReferences();
 			if(td == null)
 				continue;
 			for (Object object : table) {
 				logger.debug("\tobject = "+object);
+				
 			}
 		}
 	}
