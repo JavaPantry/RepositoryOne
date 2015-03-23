@@ -29,7 +29,7 @@ public class ReferenceFinderTest {
 	}
 
 	@Test
-	public void testReferenceFinder() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public void testReferenceFinder() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, NoSuchFieldException, SecurityException {
 		ReferenceFinder.linkTables(descriptorTables, collectedBeansFromTablesAsMap);
 	}
 

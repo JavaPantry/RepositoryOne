@@ -1,6 +1,7 @@
 package com.avp.excel.template.engine;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -28,12 +29,12 @@ public class ReferenceFinder {
 	 * what to pass as String content from ExcelTemplateEngine/src/main/java/com/avp/excel/template/engine/ExcelTemplateHelper.java?
 	 * at the end of parseDataSheet(HSSFSheet dataSheet) you have access to descriptors and collected data
 	 * pass it here! and test in ReferenceFinderTest
+	 * private ReferenceFinder(String content) {}
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
-	@Deprecated
-	private ReferenceFinder(String content) {
-	}
 
-	public static void linkTables(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public static void linkTables(List<TableDescriptor> descriptorTables,	Map<String, ArrayList<Object>> collectedBeansFromTablesAsMap) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, NoSuchFieldException, SecurityException {
 		logger.debug("descriptorTables = "+descriptorTables);
 		Set<String> setOfBeans = collectedBeansFromTablesAsMap.keySet();
 		//scan tables for beans with references
@@ -52,10 +53,9 @@ public class ReferenceFinder {
 				String refClassName = refClassProperty.getReferencedEntity().substring(0,startPropertyIdx);
 				String refPropertyName = refClassProperty.getReferencedEntity().substring(startPropertyIdx+1);
 				String ptrPropertyName = refClassProperty.getPropertyName();
-				
 				List<Object> referedBeans = collectedBeansFromTablesAsMap.get(refClassName);
-				if(GeneralUtil.isEmpty(referedBeans))continue;
-				
+				//skip linkage if there no reference column
+				if(GeneralUtil.isEmpty(referedBeans)) continue;
 				//link all objects in table
 				for (Object object : table) {
 					logger.debug("\tobject = "+object);
@@ -67,19 +67,39 @@ public class ReferenceFinder {
 						logger.debug("\trefValue = " + refValue);
 						if(dstValue.equals(refValue)){
 							logger.debug("\treferedBean {"+referedBean+"} link to {" + object+"}");
-							//find where I can insert reference
+							// find where I can insert reference 
 							PropertyDescriptor[] propertyDescriptors	= PropertyUtils.getPropertyDescriptors(referedBean);
 							for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
 								logger.debug("\t\tpropertyDescriptor "+propertyDescriptor);
 								Class<?> propertyType = propertyDescriptor.getPropertyType();
-								//if( propertyType.getClass().equals(List.class)  ){
+								/*
+								//one to many with name convention
+								// we can add child object if in referred parent object we can find List property with name similar name 
+								// for example ActualDTO can be added to List<ActualDTO> actualDTOs (Reflection API will see List getActualDTOs())
 								if( propertyType==List.class && propertyDescriptor.getName().toLowerCase().indexOf(entityClassName)>=0){
 									logger.debug("\t\t"+propertyDescriptor.getName()+ " is List of "+ entityClassName);
 									List list = (List)PropertyUtils.getProperty(referedBean, propertyDescriptor.getName());
 									list.add(object);
+								}*/
+								//one to many with lang reflection determining type of generic list 
+								//google 'reflection generic collection type' http://stackoverflow.com/questions/1942644/get-generic-type-of-java-util-list
+								if( propertyType==List.class ){
+									logger.debug("\t\t"+propertyDescriptor.getName()+ " is List of "+ entityClassName);
+									Field listField = referedBean.getClass().getDeclaredField(propertyDescriptor.getName());
+									ParameterizedType listFieldType = (ParameterizedType) listField.getGenericType();
+									Class<?> listClass = (Class<?>) listFieldType.getActualTypeArguments()[0];
+									if(listClass == object.getClass()){
+										List list = (List)PropertyUtils.getProperty(referedBean, propertyDescriptor.getName());
+										list.add(object);
+									}
+								}								/*
+								 * TODO - <AP> this should work but haven't tested
+								//one to one
+								if( propertyType==object.getClass() ){
+									PropertyUtils.setProperty(referedBean, propertyDescriptor.getName(), object);
 								}
+								*/
 							}
-							
 						}
 					}//eof for all refered beans
 				}//eof for all object in table
@@ -94,8 +114,10 @@ public class ReferenceFinder {
 		}
 		return null;
 	}
+	
+	/*  Not Used
 	//http://qussay.com/2013/09/28/handling-java-generic-types-with-reflection/
-//import java.lang.reflect.Type;	
+    //import java.lang.reflect.Type;	
 	public static Type[] getParameterizedTypes(Object object) {
 		    Type superclassType = object.getClass().getGenericSuperclass();
 		    if (!ParameterizedType.class.isAssignableFrom(superclassType.getClass())) {
@@ -103,6 +125,6 @@ public class ReferenceFinder {
 		    }
 		    return ((ParameterizedType)superclassType).getActualTypeArguments();
 		}
-
+   */
 
 }
