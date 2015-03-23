@@ -92,7 +92,8 @@ public class ReferenceFinder {
 										List list = (List)PropertyUtils.getProperty(referedBean, propertyDescriptor.getName());
 										list.add(object);
 									}
-								}								/*
+								}
+								/*
 								 * TODO - <AP> this should work but haven't tested
 								//one to one
 								if( propertyType==object.getClass() ){
